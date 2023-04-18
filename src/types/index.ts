@@ -7,11 +7,17 @@ export interface ChildProps {
   children: ReactNode
 }
 
+export interface Error {
+  message: string
+  name: string
+  code: number
+  config: any
+  request: any
+  response: {
+    data?: { [key: string]: any }
+    [key: string]: any
+  }
+}
+
 export * from './navigation'
-
-// import type {PropsWithChildren} from 'react';
-// type SectionProps = PropsWithChildren<{
-//   title: string;
-// }>;
-
-// function Section({children, title}: SectionProps): JSX.Element {
+export * from './form'
