@@ -1,3 +1,5 @@
+import { User } from './user'
+
 export type RefreshTokenSuccess = {
   status: boolean
   accessToken: string
@@ -11,21 +13,16 @@ export type LoginSuccess = {
 }
 
 export type ApiResponse = {
-  status: boolean
+  success: boolean
   message: string
 }
 
 export type ProfileResponse = {
-  status: boolean
-  user: {
-    id: string
-    email: string
-    fullName: string | null
-    avatarUrl: string | null
-    isVerified: boolean
-    isActive: boolean
-    createdAt: Date
-    updatedAt: Date
-    deletedAt: Date | null
-  }
+  success: boolean
+  user: User
+}
+
+export type PresignedUrlResponse = {
+  presignedUrl: string
+  url: string
 }

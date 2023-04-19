@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction, createContext, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 
 import { ChildProps } from '../types'
 import { logoutUser } from '../services/http'
-import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 
 type AuthContextType = {
   isAuthenticated: boolean

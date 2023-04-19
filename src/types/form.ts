@@ -4,3 +4,14 @@ export type AuthFormData = {
   confirmPassword?: string
   fullName?: string
 }
+
+export type EditProfileFormData = {
+  email?: string
+  fullName: string
+}
+
+export type UpdatePasswordFormData = {
+  oldPassword: string
+  newPassword: string
+  confirmPassword: string
+}

@@ -5,6 +5,7 @@ import { StatusBar } from 'react-native'
 import { AlertNotificationRoot } from 'react-native-alert-notification'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+import AppProvider from './store/app-context'
 import AuthProvider from './store/auth-context'
 import MainNavigation from './navigation/MainNavigation'
 
@@ -23,9 +24,11 @@ function App(): JSX.Element {
       <StatusBar barStyle="dark-content" />
       <AlertNotificationRoot>
         <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <MainNavigation />
-          </QueryClientProvider>
+          <AppProvider>
+            <QueryClientProvider client={queryClient}>
+              <MainNavigation />
+            </QueryClientProvider>
+          </AppProvider>
         </AuthProvider>
       </AlertNotificationRoot>
     </>

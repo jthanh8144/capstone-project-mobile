@@ -22,7 +22,7 @@ function LoginScreen({ navigation }: LoginStackProp) {
         title: 'Error',
         textBody:
           err?.response?.data?.message ||
-          'Something is error! Please try against later.',
+          'Something is error! Please try again later.',
         button: 'close',
       })
     }
