@@ -1,14 +1,14 @@
 import React, { useContext, useEffect } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import jwtDecode from 'jwt-decode'
+import SplashScreen from 'react-native-splash-screen'
 
 import NonAuthenticatedStack from './NonAuthenticatedStack'
 import AuthenticatedStack from './AuthenticatedStack'
 import { AuthContext } from '../store/auth-context'
-
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { StackParamList } from '../types'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import jwtDecode from 'jwt-decode'
 
 export const Stack = createNativeStackNavigator<StackParamList>()
 
@@ -32,6 +32,7 @@ function MainNavigation() {
           setIsAuthenticated(true)
         }
       }
+      SplashScreen.hide()
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

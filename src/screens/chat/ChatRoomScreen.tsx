@@ -1,7 +1,8 @@
 import React from 'react'
+import { Text } from 'react-native'
 
 function ChatRoomScreen() {
-  return <></>
+  return <Text>Chat room</Text>
 }
 
 export default ChatRoomScreen
