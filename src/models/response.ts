@@ -1,3 +1,4 @@
+import { FriendRequest } from './friend-request'
 import { User } from './user'
 
 export type RefreshTokenSuccess = {
@@ -25,4 +26,14 @@ export type ProfileResponse = {
 export type PresignedUrlResponse = {
   presignedUrl: string
   url: string
+}
+
+export type FriendRequestResponse = {
+  success: boolean
+  friendRequests: FriendRequest[]
+}
+
+export type FriendsListResponse = {
+  success: boolean
+  friends: User[]
 }
