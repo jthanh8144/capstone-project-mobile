@@ -1,6 +1,8 @@
 import { axiosPublic, axiosPrivate } from './axios'
 import {
   ApiResponse,
+  FriendRequestResponse,
+  FriendsListResponse,
   LoginSuccess,
   PresignedUrlResponse,
   ProfileResponse,
@@ -109,6 +111,69 @@ export async function removeUser(password: string) {
     const res = await axiosPrivate.put<ApiResponse>('/users', {
       password,
     })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function getReceivedFriendRequests() {
+  try {
+    const res = await axiosPrivate.get<FriendRequestResponse>(
+      '/friend-requests/received',
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function getSendedFriendRequests() {
+  try {
+    const res = await axiosPrivate.get<FriendRequestResponse>(
+      '/friend-requests/sended',
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function updateReceivedFriendRequest(id: string, status: string) {
+  try {
+    const res = await axiosPrivate.put<ApiResponse>('/friend-requests', {
+      id,
+      status,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function removeSendedFriendRequest(id: string) {
+  try {
+    const res = await axiosPrivate.delete<ApiResponse>(`/friend-requests/${id}`)
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function sendFriendRequest(receiverId: string) {
+  try {
+    const res = await axiosPrivate.post<ApiResponse>(`/friend-requests`, {
+      receiverId,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function getFriendsList() {
+  try {
+    const res = await axiosPrivate.get<FriendsListResponse>(`/users/friends`)
     return res.data
   } catch (err) {
     throw err

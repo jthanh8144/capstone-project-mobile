@@ -6,4 +6,6 @@ export const Colors = {
   textLight: '#fff',
   gray: '#808080',
   red: 'red',
+  cancelBgr: '#ddd',
+  cancelText: '#6b6b6b',
 }

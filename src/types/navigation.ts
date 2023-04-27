@@ -43,3 +43,13 @@ export type ChangePasswordStackProp = NativeStackScreenProps<
   AuthenticatedStackParamList,
   'ChangePassword'
 >
+
+export type FriendRequestStackPropHook = NativeStackNavigationProp<
+  AuthenticatedStackParamList,
+  'FriendRequest'
+>
+
+export type FriendListStackPropHook = NativeStackNavigationProp<
+  AuthenticatedStackParamList,
+  'FriendList'
+>
