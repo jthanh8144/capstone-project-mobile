@@ -5,7 +5,7 @@ export type User = {
   avatarUrl: string | null
   isVerified: boolean
   isActive: boolean
-  createdAt: Date
-  updatedAt: Date
-  deletedAt: Date | null
+  createdAt?: Date
+  updatedAt?: Date
+  deletedAt?: Date | null
 }

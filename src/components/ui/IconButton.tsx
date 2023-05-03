@@ -13,11 +13,12 @@ function IconButton({
 }: {
   svgText: string
   size?: number
-  color: string
+  color?: string
   backgroundColor?: string
   onPress: PressFunction
 }) {
   const styles = StyleSheet.create({
+    container: {},
     pressed: {
       opacity: 0.7,
     },
@@ -32,6 +33,7 @@ function IconButton({
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
+        styles.container,
         pressed && styles.pressed,
         !!backgroundColor && styles.btn,
       ]}>

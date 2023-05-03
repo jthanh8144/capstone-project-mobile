@@ -8,4 +8,5 @@ export const Colors = {
   red: 'red',
   cancelBgr: '#ddd',
   cancelText: '#6b6b6b',
+  white: '#fff',
 }

@@ -40,8 +40,6 @@ function MainNavigation() {
   return (
     <NavigationContainer>
       {isAuthenticated ? <AuthenticatedStack /> : <NonAuthenticatedStack />}
-      {/* {isAuthenticated && <AuthenticatedStack />}
-      {!isAuthenticated && <NonAuthenticatedStack />} */}
     </NavigationContainer>
   )
 }
