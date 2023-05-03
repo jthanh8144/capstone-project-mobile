@@ -5,6 +5,7 @@ import { AuthenticatedStackParamList } from '../types'
 import BottomTabNavigation from './BottomTabNavigation'
 import EditProfileScreen from '../screens/user/EditProfileScreen'
 import ChangePasswordScreen from '../screens/user/ChangePasswordScreen'
+import ChatRoomScreen from '../screens/chat/ChatRoomScreen'
 import { Colors } from '../constants/colors'
 
 const Stack = createNativeStackNavigator<AuthenticatedStackParamList>()
@@ -17,6 +18,7 @@ function AuthenticatedStack() {
         name="EditProfile"
         component={EditProfileScreen}
         options={{
+          presentation: 'modal',
           headerShown: true,
           title: 'Edit Profile',
           headerStyle: { backgroundColor: Colors.background },
@@ -32,6 +34,13 @@ function AuthenticatedStack() {
           title: 'Update Password',
           headerStyle: { backgroundColor: Colors.background },
           headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="Chat"
+        component={ChatRoomScreen}
+        options={{
+          headerShown: true,
         }}
       />
     </Stack.Navigator>

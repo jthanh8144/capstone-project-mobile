@@ -1,4 +1,6 @@
+import { Conservation } from './conservation'
 import { FriendRequest } from './friend-request'
+import { Message } from './message'
 import { User } from './user'
 
 export type RefreshTokenSuccess = {
@@ -36,4 +38,15 @@ export type FriendRequestResponse = {
 export type FriendsListResponse = {
   success: boolean
   friends: User[]
+}
+
+export type ConservationsResponse = {
+  success: boolean
+  conservations: Conservation[]
+}
+
+export type DetailConservationResponse = {
+  success: boolean
+  messages: Message[]
+  totalPage: number
 }

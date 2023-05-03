@@ -128,9 +128,9 @@ function EditProfileScreen({ navigation }: EditProfileStackProp) {
     }
   }
 
-  const { mutate, isLoading } = useMutation(saveData, {
-    onSuccess: message => {
-      queryClient.invalidateQueries(['profile'])
+  const { mutateAsync, isLoading } = useMutation(saveData, {
+    onSuccess: async message => {
+      await queryClient.invalidateQueries(['profile'])
       if (Platform.OS === 'ios') {
         navigation.goBack()
       } else {
@@ -158,16 +158,14 @@ function EditProfileScreen({ navigation }: EditProfileStackProp) {
     },
   })
 
-  const submit = (data: EditProfileFormData) => {
-    mutate(data)
-  }
-
   const saveHandler = useCallback(async () => {
     if ((user && user.fullName !== getValues('fullName')) || isAvatarChange) {
-      await handleSubmit(submit)()
+      await handleSubmit(async (data: EditProfileFormData) => {
+        await mutateAsync(data)
+      })()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [isAvatarChange])
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -181,7 +179,7 @@ function EditProfileScreen({ navigation }: EditProfileStackProp) {
       ),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isAvatarChange])
 
   if (!user) {
     return (

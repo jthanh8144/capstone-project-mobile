@@ -1,12 +1,16 @@
+import axios from 'axios'
 import { axiosPublic, axiosPrivate } from './axios'
 import {
   ApiResponse,
+  ConservationsResponse,
+  DetailConservationResponse,
   FriendRequestResponse,
   FriendsListResponse,
   LoginSuccess,
   PresignedUrlResponse,
   ProfileResponse,
 } from '../models/response'
+import { MessageTypeEnum } from '../types'
 
 export async function login(email: string, password: string) {
   try {
@@ -87,7 +91,11 @@ export async function uploadFileToPresignedUrl(
   data: any,
 ) {
   try {
-    const res = await axiosPublic.put(presignedUrl, data)
+    const res = await axios.put(presignedUrl, data, {
+      headers: {
+        'Content-Type': 'image/png',
+      },
+    })
     return res.status
   } catch (err) {
     throw err
@@ -162,7 +170,7 @@ export async function removeSendedFriendRequest(id: string) {
 
 export async function sendFriendRequest(receiverId: string) {
   try {
-    const res = await axiosPrivate.post<ApiResponse>(`/friend-requests`, {
+    const res = await axiosPrivate.post<ApiResponse>('/friend-requests', {
       receiverId,
     })
     return res.data
@@ -173,8 +181,52 @@ export async function sendFriendRequest(receiverId: string) {
 
 export async function getFriendsList() {
   try {
-    const res = await axiosPrivate.get<FriendsListResponse>(`/users/friends`)
+    const res = await axiosPrivate.get<FriendsListResponse>('/users/friends')
     return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function getConservations() {
+  try {
+    const res = await axiosPrivate.get<ConservationsResponse>(
+      '/users/conservations',
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function getConservation(conservationId: string, page = 1) {
+  try {
+    const res = await axiosPrivate.get<DetailConservationResponse>(
+      `/conservations/${conservationId}?page=${page}`,
+    )
+    return {
+      ...res.data,
+      nextPage: res.data.totalPage === page ? undefined : page + 1,
+    }
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function sendMessage(
+  conservationId: string,
+  message: string,
+  messageType: MessageTypeEnum,
+) {
+  try {
+    const res = await axiosPrivate.post<ApiResponse>(
+      `/conservations/${conservationId}`,
+      {
+        message,
+        messageType,
+      },
+    )
+    return res.status
   } catch (err) {
     throw err
   }

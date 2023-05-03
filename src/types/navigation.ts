@@ -2,6 +2,8 @@ import type {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack'
+import { User } from '../models/user'
+import { ConservationSetting } from '../models/conservation'
 
 export type StackParamList = {
   OnBoarding: undefined
@@ -27,6 +29,7 @@ export type AuthenticatedStackParamList = {
 
   EditProfile: undefined
   ChangePassword: undefined
+  Chat: { id: string; user: User; setting: ConservationSetting }
 }
 
 export type ProfileStackPropHook = NativeStackNavigationProp<
@@ -52,4 +55,14 @@ export type FriendRequestStackPropHook = NativeStackNavigationProp<
 export type FriendListStackPropHook = NativeStackNavigationProp<
   AuthenticatedStackParamList,
   'FriendList'
+>
+
+export type ChatStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'Chat'
+>
+
+export type ChatStackPropHook = NativeStackNavigationProp<
+  AuthenticatedStackParamList,
+  'Chat'
 >
