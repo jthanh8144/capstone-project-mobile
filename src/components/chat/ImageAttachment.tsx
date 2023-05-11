@@ -1,5 +1,6 @@
 import React from 'react'
 import { Image, Pressable, StyleSheet } from 'react-native'
+import { images } from '../../assets/images'
 
 function ImageAttachment({ url }: { url: string }) {
   return (
@@ -9,7 +10,10 @@ function ImageAttachment({ url }: { url: string }) {
           styles.imageContainer,
           // attachments.length === 1 && { flex: 1 },
         ]}>
-        <Image source={{ uri: url }} style={styles.image} />
+        <Image
+          source={url ? { uri: url } : images.imagePlaceholder}
+          style={styles.image}
+        />
       </Pressable>
     </>
   )

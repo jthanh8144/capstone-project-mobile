@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react'
-import { RefreshControl, StyleSheet, View } from 'react-native'
+import { Platform, RefreshControl, StyleSheet, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { io } from 'socket.io-client'
-import Config from 'react-native-config'
+// import Config from 'react-native-config'
 
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
 import ChatList from '../../components/chat/ChatList'
@@ -20,7 +20,6 @@ function ChatListScreen() {
   const [conservations, setConservations] = useState<Conservation[]>([])
 
   const queryClient = useQueryClient()
-  // const queryCache = new QueryCache()
 
   const handleOnNewMessage = async (data: OnMessageData) => {
     try {
@@ -44,9 +43,14 @@ function ChatListScreen() {
             if (res && res.user) {
               setUser(res.user)
 
-              const socket = io(Config.API_URL || '', {
-                query: { roomId: res.user.id },
-              })
+              const socket = io(
+                Platform.OS === 'android'
+                  ? 'http://10.0.2.2:3000'
+                  : 'http://localhost:3000' || '',
+                {
+                  query: { roomId: res.user.id },
+                },
+              )
               socket.on('message', handleOnNewMessage)
             }
             return res

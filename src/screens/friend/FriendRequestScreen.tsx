@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { useQueries } from '@tanstack/react-query'
@@ -6,17 +6,17 @@ import Spinner from 'react-native-loading-spinner-overlay'
 
 import FriendRequestList from '../../components/friend/FriendRequestList'
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
-import { AppContext } from '../../store/app-context'
 import { Colors } from '../../constants/colors'
 import { FriendRequestStackPropHook } from '../../types'
 import {
   getReceivedFriendRequests,
   getSendedFriendRequests,
 } from '../../services/http'
+import { FriendRequest } from '../../models/friend-request'
 
 function FriendRequestScreen() {
-  const { receivedList, sendedList, setReceivedList, setSendedList } =
-    useContext(AppContext)
+  const [receivedList, setReceivedList] = useState<FriendRequest[]>([])
+  const [sendedList, setSendedList] = useState<FriendRequest[]>([])
 
   const { setOptions } = useNavigation<FriendRequestStackPropHook>()
 

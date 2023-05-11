@@ -1,5 +1,7 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native'
+import { SessionCipher } from '@privacyresearch/libsignal-protocol-typescript'
+import { TextDecoder } from 'text-encoding'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -10,9 +12,23 @@ import { Colors } from '../../constants/colors'
 import { AppContext } from '../../store/app-context'
 import { MessageTypeEnum } from '../../types'
 import ImageAttachment from './ImageAttachment'
+import Base64 from '../../utils/base64'
+import { LocalMessage, LocalMessageRepository } from '../../services/database'
 
-function Message({ message }: { message: MessageModel }) {
-  const { user } = useContext(AppContext)
+function Message({
+  message,
+  sessionCipher,
+  localMessages,
+  localMessageRepository,
+}: {
+  message: MessageModel
+  sessionCipher: SessionCipher
+  localMessages: LocalMessage[]
+  localMessageRepository: LocalMessageRepository
+}) {
+  const { user, setLocalMessages } = useContext(AppContext)
+
+  const [plainText, setPlainText] = useState('')
 
   const { width } = useWindowDimensions()
   const imageContainerWidth = width * 0.8 - 30
@@ -25,18 +41,56 @@ function Message({ message }: { message: MessageModel }) {
     }
   }
 
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const localMessage = localMessages.find(
+          mess => mess.messageId === message.id,
+        )
+        if (localMessage) {
+          setPlainText(localMessage.plainText)
+        } else {
+          let result: ArrayBuffer = new Uint8Array()
+          const realMessage = Base64.atob(message.message)
+          if (!isMyMessage()) {
+            if (message.encryptType === 3) {
+              result = await sessionCipher.decryptPreKeyWhisperMessage(
+                realMessage,
+              )
+            } else if (message.encryptType === 1) {
+              result = await sessionCipher.decryptWhisperMessage(realMessage)
+            }
+            const decodedText = new TextDecoder().decode(new Uint8Array(result))
+            setPlainText(decodedText)
+            await localMessageRepository.saveMessage(
+              message.conservationId,
+              message.id,
+              decodedText,
+            )
+            setLocalMessages(
+              await localMessageRepository.getMessagesOfConservation(
+                message.conservationId,
+              ),
+            )
+          }
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <View
       style={[
         styles.container,
         isMyMessage() ? styles.myMessage : styles.notMyMessage,
       ]}>
-      {message.messageType === MessageTypeEnum.text && (
-        <Text>{message.message}</Text>
-      )}
+      {message.messageType === MessageTypeEnum.text && <Text>{plainText}</Text>}
       {message.messageType === MessageTypeEnum.image && (
         <View style={[styles.images, { width: imageContainerWidth }]}>
-          <ImageAttachment url={message.message} />
+          <ImageAttachment url={plainText} />
         </View>
       )}
       <Text style={styles.time}>{dayjs(message.createdAt).fromNow(true)}</Text>

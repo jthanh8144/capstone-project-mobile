@@ -50,3 +50,13 @@ export type DetailConservationResponse = {
   messages: Message[]
   totalPage: number
 }
+
+export type GetDeviceId = {
+  success: boolean
+  deviceId: number
+}
+
+export type SendMessageResponse = {
+  success: boolean
+  messageId: string
+}
