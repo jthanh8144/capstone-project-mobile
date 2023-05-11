@@ -8,7 +8,11 @@ import { logoutUser } from '../services/http'
 type AuthContextType = {
   isAuthenticated: boolean
   setIsAuthenticated: Dispatch<SetStateAction<boolean>>
-  authenticate: (accessToken: string, refreshToken: string) => Promise<void>
+  authenticate: (
+    accessToken: string,
+    refreshToken: string,
+    userId: string,
+  ) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -22,10 +26,11 @@ export const AuthContext = createContext<AuthContextType>({
 function AuthProvider({ children }: ChildProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  async function authenticate(access: string, refresh: string) {
+  async function authenticate(access: string, refresh: string, userId: string) {
     await Promise.all([
       AsyncStorage.setItem('accessToken', access),
       AsyncStorage.setItem('refreshToken', refresh),
+      AsyncStorage.setItem('userId', userId),
     ])
     setIsAuthenticated(true)
   }
@@ -44,6 +49,7 @@ function AuthProvider({ children }: ChildProps) {
     await Promise.all([
       AsyncStorage.removeItem('accessToken'),
       AsyncStorage.removeItem('refreshToken'),
+      AsyncStorage.removeItem('userId'),
     ])
     setIsAuthenticated(false)
   }

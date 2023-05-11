@@ -2,40 +2,38 @@ import React, { Dispatch, SetStateAction, createContext, useState } from 'react'
 
 import { ChildProps } from '../types'
 import { User } from '../models/user'
-import { FriendRequest } from '../models/friend-request'
+import { SignalProtocolStore } from './signal'
+import { LocalMessage } from '../services/database'
 
 type AppContextType = {
   user: User | null
   setUser: Dispatch<SetStateAction<User | null>>
-  receivedList: FriendRequest[]
-  setReceivedList: Dispatch<SetStateAction<FriendRequest[]>>
-  sendedList: FriendRequest[]
-  setSendedList: Dispatch<SetStateAction<FriendRequest[]>>
+  signalStore: SignalProtocolStore
+  localMessages: LocalMessage[]
+  setLocalMessages: Dispatch<SetStateAction<LocalMessage[]>>
 }
 
 export const AppContext = createContext<AppContextType>({
   user: null,
   setUser: () => {},
-  receivedList: [],
-  setReceivedList: () => {},
-  sendedList: [],
-  setSendedList: () => {},
+  signalStore: new SignalProtocolStore(),
+  localMessages: [],
+  setLocalMessages: () => {},
 })
 
 function AppProvider({ children }: ChildProps) {
   const [user, setUser] = useState<User | null>(null)
-  const [receivedList, setReceivedList] = useState<FriendRequest[]>([])
-  const [sendedList, setSendedList] = useState<FriendRequest[]>([])
+  const [signalStore] = useState(new SignalProtocolStore())
+  const [localMessages, setLocalMessages] = useState<LocalMessage[]>()
 
   return (
     <AppContext.Provider
       value={{
         user,
         setUser,
-        receivedList,
-        setReceivedList,
-        sendedList,
-        setSendedList,
+        signalStore,
+        localMessages,
+        setLocalMessages,
       }}>
       {children}
     </AppContext.Provider>

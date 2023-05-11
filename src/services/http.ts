@@ -1,3 +1,4 @@
+import { SendMessageResponse } from './../models/response'
 import axios from 'axios'
 import { axiosPublic, axiosPrivate } from './axios'
 import {
@@ -6,6 +7,7 @@ import {
   DetailConservationResponse,
   FriendRequestResponse,
   FriendsListResponse,
+  GetDeviceId,
   LoginSuccess,
   PresignedUrlResponse,
   ProfileResponse,
@@ -217,16 +219,46 @@ export async function sendMessage(
   conservationId: string,
   message: string,
   messageType: MessageTypeEnum,
+  encryptType: number,
 ) {
   try {
-    const res = await axiosPrivate.post<ApiResponse>(
+    const res = await axiosPrivate.post<SendMessageResponse>(
       `/conservations/${conservationId}`,
       {
         message,
         messageType,
+        encryptType,
       },
     )
-    return res.status
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function getDeviceId(uniqueId: string) {
+  try {
+    const res = await axiosPublic.get<GetDeviceId>('/devices', {
+      params: { deviceId: uniqueId },
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function postSignalKey(data: {
+  registrationId: number
+  ikPublicKey: string
+  spkKeyId: number
+  spkPublicKey: string
+  spkSignature: string
+  pkKeyId: number
+  pkPublicKey: string
+}) {
+  try {
+    const res = await axiosPrivate.post<ApiResponse>('/users/signal', data)
+    return res.data
   } catch (err) {
     throw err
   }

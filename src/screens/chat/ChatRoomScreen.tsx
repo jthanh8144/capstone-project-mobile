@@ -1,4 +1,10 @@
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import {
   FlatList,
   ImageBackground,
@@ -17,18 +23,39 @@ import { LIMIT_CHAT_SELECTED } from '../../constants/limit'
 import { getConservation } from '../../services/http'
 import { images } from '../../assets/images'
 import { ChatStackProp } from '../../types'
-
-function renderItem(itemData: ListRenderItemInfo<MessageModel>) {
-  const { item } = itemData
-  return <Message message={item} />
-}
+import { LocalMessageRepository } from '../../services/database'
+import { AppContext } from '../../store/app-context'
 
 function ChatRoomScreen({ route, navigation }: ChatStackProp) {
   const conservationId = route.params.id
+  const { sessionCipher } = route.params
+
+  const { localMessages } = useContext(AppContext)
+
   const [isFirstTime, setIsFirstTime] = useState(true)
   const [page, setPage] = useState(1)
 
   const flatListRef = useRef<FlatList<MessageModel>>(null)
+  const localMessageRepository = useRef<LocalMessageRepository | null>(null)
+  if (!localMessageRepository.current) {
+    localMessageRepository.current = new LocalMessageRepository()
+  }
+
+  const renderItem = useCallback(
+    (itemData: ListRenderItemInfo<MessageModel>) => {
+      const { item } = itemData
+      return (
+        <Message
+          message={item}
+          sessionCipher={sessionCipher}
+          localMessages={localMessages}
+          localMessageRepository={localMessageRepository.current}
+        />
+      )
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [localMessages],
+  )
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: route.params.user.fullName || '' })
@@ -107,7 +134,11 @@ function ChatRoomScreen({ route, navigation }: ChatStackProp) {
             onEndReachedThreshold={0.2}
             inverted={true}
           />
-          <ChatBox conservationId={conservationId} />
+          <ChatBox
+            conservationId={conservationId}
+            sessionCipher={sessionCipher}
+            localMessageRepository={localMessageRepository.current}
+          />
         </ImageBackground>
       </KeyboardAvoidingView>
     </>

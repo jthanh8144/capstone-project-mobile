@@ -2,6 +2,8 @@ import type {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack'
+import { SessionCipher } from '@privacyresearch/libsignal-protocol-typescript'
+
 import { User } from '../models/user'
 import { ConservationSetting } from '../models/conservation'
 
@@ -29,7 +31,12 @@ export type AuthenticatedStackParamList = {
 
   EditProfile: undefined
   ChangePassword: undefined
-  Chat: { id: string; user: User; setting: ConservationSetting }
+  Chat: {
+    id: string
+    user: User
+    setting: ConservationSetting
+    sessionCipher: SessionCipher
+  }
 }
 
 export type ProfileStackPropHook = NativeStackNavigationProp<

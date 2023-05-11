@@ -1,3 +1,4 @@
+import { SignalStore } from './signal-store'
 import { Message } from './message'
 import { User } from './user'
 
@@ -11,6 +12,7 @@ export type ConservationSetting = {
 export type Conservation = {
   id: string
   user: User
+  signal: SignalStore
   latestMessage: Message
   setting: ConservationSetting
 }

@@ -4,24 +4,34 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import jwtDecode from 'jwt-decode'
 import SplashScreen from 'react-native-splash-screen'
+import { getUniqueIdSync } from 'react-native-device-info'
 
 import NonAuthenticatedStack from './NonAuthenticatedStack'
 import AuthenticatedStack from './AuthenticatedStack'
 import { AuthContext } from '../store/auth-context'
+import { AppContext } from '../store/app-context'
+import { getDeviceId } from '../services/http'
 import { StackParamList } from '../types'
+import { getFromLocalStorage } from '../utils'
+import { initializeDbConnection } from '../services/database'
 
 export const Stack = createNativeStackNavigator<StackParamList>()
 
 function MainNavigation() {
   const { setIsAuthenticated, logout, isAuthenticated } =
     useContext(AuthContext)
+  const { signalStore } = useContext(AppContext)
 
   useEffect(() => {
     ;(async () => {
-      const [accessToken, refreshToken] = await Promise.all([
-        AsyncStorage.getItem('accessToken'),
-        AsyncStorage.getItem('refreshToken'),
-      ])
+      const [accessToken, refreshToken, storedDeviceId, userId] =
+        await Promise.all([
+          AsyncStorage.getItem('accessToken'),
+          AsyncStorage.getItem('refreshToken'),
+          AsyncStorage.getItem('deviceId'),
+          AsyncStorage.getItem('userId'),
+          initializeDbConnection(),
+        ])
       if (refreshToken && accessToken) {
         if (
           jwtDecode<{ exp: number; [key: string]: any }>(refreshToken).exp <
@@ -31,6 +41,13 @@ function MainNavigation() {
         } else {
           setIsAuthenticated(true)
         }
+      }
+      if (!storedDeviceId) {
+        const { deviceId } = await getDeviceId(getUniqueIdSync())
+        await AsyncStorage.setItem('deviceId', deviceId.toString())
+      }
+      if (userId) {
+        await getFromLocalStorage(userId, signalStore)
       }
       SplashScreen.hide()
     })()

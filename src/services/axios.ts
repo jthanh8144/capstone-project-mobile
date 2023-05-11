@@ -1,19 +1,22 @@
 import axios from 'axios'
-import Config from 'react-native-config'
+// import Config from 'react-native-config'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { RefreshTokenSuccess } from './../models/response'
+import { Platform } from 'react-native'
 
-console.log('URL', Config.API_URL)
+const baseURL =
+  Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000'
+
 export const axiosPublic = axios.create({
-  baseURL: Config.API_URL,
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
 export const axiosPrivate = axios.create({
-  baseURL: Config.API_URL,
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

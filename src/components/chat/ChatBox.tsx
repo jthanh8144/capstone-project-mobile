@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { FlatList, Image, StyleSheet, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -9,6 +9,8 @@ import {
 } from 'react-native-image-picker'
 import Modal from 'react-native-modal'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
+import { SessionCipher } from '@privacyresearch/libsignal-protocol-typescript'
+import { TextEncoder } from 'text-encoding'
 import { Buffer } from 'buffer'
 
 import IconButton from '../ui/IconButton'
@@ -18,12 +20,25 @@ import { PLUS, SEND, X_MARK } from '../../constants/icons'
 import { Colors } from '../../constants/colors'
 import { MessageTypeEnum } from '../../types'
 import { getPresignedUrl, sendMessage } from '../../services/http'
+import { LocalMessageRepository } from '../../services/database'
 import { uploadFileToPresignedUrl } from '../../services/http'
+import { AppContext } from '../../store/app-context'
+import Base64 from '../../utils/base64'
 
-function ChatBox({ conservationId }: { conservationId: string }) {
+function ChatBox({
+  conservationId,
+  sessionCipher,
+  localMessageRepository,
+}: {
+  conservationId: string
+  sessionCipher: SessionCipher
+  localMessageRepository: LocalMessageRepository
+}) {
+  const { setLocalMessages } = useContext(AppContext)
+
   const [text, setText] = useState('')
   const [files, setFiles] = useState<Array<Asset>>([])
-  const [type, setType] = useState(MessageTypeEnum.text)
+  const [type] = useState(MessageTypeEnum.text)
   const [isShowModal, setIsShowModel] = useState(false)
 
   const queryClient = useQueryClient()
@@ -32,16 +47,39 @@ function ChatBox({ conservationId }: { conservationId: string }) {
     async ({
       message,
       messageType,
+      encryptType,
+      url,
     }: {
       message: string
       messageType: MessageTypeEnum
+      encryptType: number
+      url?: string
     }) => {
-      await sendMessage(conservationId, message.trim(), messageType)
+      const { messageId } = await sendMessage(
+        conservationId,
+        message,
+        messageType,
+        encryptType,
+      )
+      const data = url || text.trim()
       setText('')
+      return [messageId, data]
     },
     {
-      onSuccess: async () => {
+      onSuccess: async data => {
+        await localMessageRepository.saveMessage(
+          conservationId,
+          data[0],
+          data[1],
+        )
         await Promise.all([
+          // queryClient.invalidateQueries([`local_messages_${conservationId}`]),
+          (async () => {
+            const res = await localMessageRepository.getMessagesOfConservation(
+              conservationId,
+            )
+            setLocalMessages(res)
+          })(),
           queryClient.invalidateQueries([`conservation_${conservationId}`]),
           queryClient.invalidateQueries(['conservations']),
         ])
@@ -75,7 +113,13 @@ function ChatBox({ conservationId }: { conservationId: string }) {
 
   const handleSendMessage = async () => {
     if (text.trim()) {
-      mutate({ message: text, messageType: type })
+      const buffer = new TextEncoder().encode(text.trim()).buffer
+      const cipherText = await sessionCipher.encrypt(buffer)
+      mutate({
+        message: Base64.btoa(cipherText.body),
+        messageType: type,
+        encryptType: cipherText.type,
+      })
     }
     if (files.length) {
       const urls = await Promise.all(
@@ -92,9 +136,16 @@ function ChatBox({ conservationId }: { conservationId: string }) {
           return url
         }),
       )
-      urls.forEach(url => {
-        mutate({ message: url, messageType: MessageTypeEnum.image })
-      })
+      for (const url of urls) {
+        const buffer = new TextEncoder().encode(url).buffer
+        const cipherText = await sessionCipher.encrypt(buffer)
+        mutate({
+          message: Base64.btoa(cipherText.body),
+          messageType: MessageTypeEnum.image,
+          encryptType: cipherText.type,
+          url,
+        })
+      }
       setFiles([])
     }
   }
