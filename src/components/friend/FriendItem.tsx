@@ -1,25 +1,104 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import { Image, Pressable, StyleSheet, Text } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useNavigation } from '@react-navigation/native'
+import {
+  SessionBuilder,
+  SessionCipher,
+  SignalProtocolAddress,
+} from '@privacyresearch/libsignal-protocol-typescript'
+import Spinner from 'react-native-loading-spinner-overlay'
+
 import { images } from '../../assets/images'
 import { Colors } from '../../constants/colors'
 import { User } from '../../models/user'
+import { getConservationWith } from '../../services/http'
+import { LocalMessageRepository } from '../../services/database'
+import { AppContext } from '../../store/app-context'
+import { base64ToArrayBuffer } from '../../utils'
+import { ChatStackPropHook, VoidFunction } from '../../types'
 
-function FriendItem({ friend }: { friend: User }) {
-  const handlePress = () => {}
+function FriendItem({
+  friend,
+  onPress,
+}: {
+  friend: User
+  onPress?: VoidFunction
+}) {
+  const { signalStore, setLocalMessages } = useContext(AppContext)
+  const [isLoading, setIsLoading] = useState(false)
+  const { navigate } = useNavigation<ChatStackPropHook>()
+
+  const handlePress = async () => {
+    if (onPress) {
+      onPress()
+    }
+    try {
+      setIsLoading(true)
+      const { existed, data } = await getConservationWith(friend.id)
+      if (existed) {
+        const deviceId = (await AsyncStorage.getItem('deviceId')) || '0'
+        const address = new SignalProtocolAddress(data.user.id, +deviceId)
+        const sessionBuilder = new SessionBuilder(signalStore, address)
+        await Promise.all([
+          (async () => {
+            if (
+              !signalStore.get(`identityKey${address.getName()}`, undefined)
+            ) {
+              await sessionBuilder.processPreKey({
+                registrationId: data.signal.registrationId,
+                identityKey: base64ToArrayBuffer(data.signal.ikPublicKey),
+                preKey: {
+                  keyId: data.signal.pkKeyId,
+                  publicKey: base64ToArrayBuffer(data.signal.pkPublicKey),
+                },
+                signedPreKey: {
+                  keyId: data.signal.spkKeyId,
+                  publicKey: base64ToArrayBuffer(data.signal.spkPublicKey),
+                  signature: base64ToArrayBuffer(data.signal.spkSignature),
+                },
+              })
+            }
+          })(),
+          (async () => {
+            const repository = new LocalMessageRepository()
+            const res = await repository.getMessagesOfConservation(data.id)
+            setLocalMessages(res)
+          })(),
+        ])
+        const sessionCipher = new SessionCipher(signalStore, address)
+        navigate('Chat', {
+          id: data.id,
+          user: data.user,
+          setting: data.setting,
+          sessionCipher,
+        })
+      } else {
+        navigate('NewChat', { user: friend })
+      }
+      setIsLoading(false)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   return (
-    <Pressable
-      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
-      onPress={handlePress}>
-      <Image
-        source={
-          friend?.avatarUrl
-            ? { uri: friend.avatarUrl }
-            : images.avatarPlaceholder
-        }
-        style={styles.image}
-      />
-      <Text style={styles.name}>{friend?.fullName}</Text>
-    </Pressable>
+    <>
+      <Spinner visible={isLoading} />
+      <Pressable
+        style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+        onPress={handlePress}>
+        <Image
+          source={
+            friend?.avatarUrl
+              ? { uri: friend.avatarUrl }
+              : images.avatarPlaceholder
+          }
+          style={styles.image}
+        />
+        <Text style={styles.name}>{friend?.fullName}</Text>
+      </Pressable>
+    </>
   )
 }
 
@@ -32,6 +111,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
   },
   image: {
     width: 42,

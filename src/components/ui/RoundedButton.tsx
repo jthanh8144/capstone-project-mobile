@@ -26,7 +26,7 @@ function RoundedButton({
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor,
-      minWidth: 100,
+      minWidth: 90,
     },
     pressed: {
       opacity: 0.7,

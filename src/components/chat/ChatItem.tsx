@@ -109,7 +109,7 @@ function ChatItem({
               : conservation.user.fullName}
             :{' '}
             {conservation.latestMessage.messageType === MessageTypeEnum.text
-              ? conservation.latestMessage.message
+              ? 'Send a message'
               : 'Attached a file'}
           </Text>
         </View>
@@ -141,6 +141,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    marginTop: 8,
     marginBottom: 5,
   },
   name: {
