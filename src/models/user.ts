@@ -1,3 +1,6 @@
+import { FriendStatusEnum } from '../types'
+import { SignalStore } from './signal-store'
+
 export type User = {
   id: string
   email: string
@@ -8,4 +11,7 @@ export type User = {
   createdAt?: Date
   updatedAt?: Date
   deletedAt?: Date | null
+  signalStore?: SignalStore
+  friendStatus?: FriendStatusEnum
+  friendRequestId?: string
 }

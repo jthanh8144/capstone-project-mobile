@@ -1,9 +1,10 @@
 import React, { useMemo, useRef, useState } from 'react'
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
 import {
   CurvedBottomBar,
   ICurvedBottomBarRef,
 } from 'react-native-curved-bottom-bar'
+import BottomSheet from '@gorhom/bottom-sheet'
 
 import Icon from '../components/ui/Icon'
 import { Colors } from '../constants/colors'
@@ -12,10 +13,11 @@ import FriendRequestScreen from '../screens/friend/FriendRequestScreen'
 import FriendListScreen from '../screens/friend/FriendListScreen'
 import ChatListScreen from '../screens/chat/ChatListScreen'
 import ProfileScreen from '../screens/user/ProfileScreen'
-import NewChatScreen from '../screens/chat/NewChatScreen'
+import NewChat from '../components/chat/NewChat'
 
 const ThemeScreen = () => {
   const ref = useRef<ICurvedBottomBarRef>(null)
+  const bottomSheetRef = useRef<BottomSheet>(null)
   const [type, setType] = useState<'DOWN' | 'UP'>('DOWN')
 
   const _renderIcon = (routeName: string, selectedTab: string) => {
@@ -64,36 +66,46 @@ const ThemeScreen = () => {
           borderTopLeftRight={true}
           initialRouteName="ChatList"
           renderCircle={({ routeName, selectedTab, navigate }) => (
-            <TouchableOpacity
-              style={[type === 'DOWN' ? styles.btnCircle : styles.btnCircleUp]}
-              onPress={() => {
-                if (routeName !== selectedTab) {
-                  navigate(routeName)
-                  if (routeName === 'NewChat') {
-                    setType('UP')
-                  } else {
-                    setType('DOWN')
+            <>
+              <TouchableOpacity
+                style={[
+                  type === 'DOWN' ? styles.btnCircle : styles.btnCircleUp,
+                ]}
+                onPress={() => {
+                  if (bottomSheetRef.current) {
+                    bottomSheetRef.current.expand()
                   }
-                }
-              }}>
-              <Icon
-                svgText={PLUS}
-                size={25}
-                color={
-                  selectedTab === routeName ? Colors.primary : Colors.textDark
-                }
-              />
-            </TouchableOpacity>
+                  if (routeName !== selectedTab) {
+                    if (routeName === 'NewChat') {
+                      setType('UP')
+                    } else {
+                      navigate(routeName)
+                      setType('DOWN')
+                    }
+                  }
+                }}>
+                <Icon
+                  svgText={PLUS}
+                  size={25}
+                  color={
+                    selectedTab === routeName ? Colors.primary : Colors.textDark
+                  }
+                />
+              </TouchableOpacity>
+              <NewChat bottomSheetRef={bottomSheetRef} />
+            </>
           )}
           tabBar={({ routeName, selectedTab, navigate }) => {
             return (
               <TouchableOpacity
                 onPress={() => {
                   if (routeName !== selectedTab) {
-                    navigate(routeName)
+                    // navigate(routeName)
                     if (routeName !== 'NewChat') {
+                      navigate(routeName)
                       setType('DOWN')
                     } else {
+                      Alert.alert('click')
                       setType('UP')
                     }
                   }
@@ -112,11 +124,6 @@ const ThemeScreen = () => {
             name="FriendRequest"
             component={FriendRequestScreen}
             position="LEFT"
-          />
-          <CurvedBottomBar.Screen
-            name="NewChat"
-            component={NewChatScreen}
-            position="CIRCLE"
           />
           <CurvedBottomBar.Screen
             name="FriendList"

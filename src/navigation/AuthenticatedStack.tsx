@@ -6,6 +6,9 @@ import BottomTabNavigation from './BottomTabNavigation'
 import EditProfileScreen from '../screens/user/EditProfileScreen'
 import ChangePasswordScreen from '../screens/user/ChangePasswordScreen'
 import ChatRoomScreen from '../screens/chat/ChatRoomScreen'
+import NewChatScreen from '../screens/chat/NewChatScreen'
+import SearchUserScreen from '../screens/search/SearchUserScreen'
+import SearchConservationScreen from '../screens/search/SearchConservationScreen'
 import { Colors } from '../constants/colors'
 
 const Stack = createNativeStackNavigator<AuthenticatedStackParamList>()
@@ -43,6 +46,18 @@ function AuthenticatedStack() {
           headerShown: true,
         }}
       />
+      <Stack.Screen
+        name="NewChat"
+        component={NewChatScreen}
+        options={{
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="SearchConservation"
+        component={SearchConservationScreen}
+      />
+      <Stack.Screen name="SearchUser" component={SearchUserScreen} />
     </Stack.Navigator>
   )
 }

@@ -37,6 +37,11 @@ export type AuthenticatedStackParamList = {
     setting: ConservationSetting
     sessionCipher: SessionCipher
   }
+  NewChat: {
+    user: User
+  }
+  SearchConservation: undefined
+  SearchUser: undefined
 }
 
 export type ProfileStackPropHook = NativeStackNavigationProp<
@@ -72,4 +77,29 @@ export type ChatStackProp = NativeStackScreenProps<
 export type ChatStackPropHook = NativeStackNavigationProp<
   AuthenticatedStackParamList,
   'Chat'
+>
+
+export type NewChatStackPropHook = NativeStackNavigationProp<
+  AuthenticatedStackParamList,
+  'NewChat'
+>
+
+export type NewChatStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'NewChat'
+>
+
+export type ChatListStackPropHook = NativeStackNavigationProp<
+  AuthenticatedStackParamList,
+  'ChatList'
+>
+
+export type SearchConservationStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'SearchConservation'
+>
+
+export type SearchUserStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'SearchUser'
 >

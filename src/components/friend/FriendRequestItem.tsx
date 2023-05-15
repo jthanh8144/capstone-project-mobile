@@ -33,9 +33,9 @@ function FriendRequestItem({
       return status
     },
     {
-      onSuccess: status => {
-        queryClient.invalidateQueries([
-          'receivedFriendRequests',
+      onSuccess: async status => {
+        await queryClient.invalidateQueries(['receivedFriendRequests'])
+        await queryClient.invalidateQueries([
           status === 'accepted' && 'friendsList',
         ])
       },

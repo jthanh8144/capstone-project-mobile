@@ -13,12 +13,13 @@ import {
   getSendedFriendRequests,
 } from '../../services/http'
 import { FriendRequest } from '../../models/friend-request'
+import Search from '../../components/ui/Search'
 
 function FriendRequestScreen() {
   const [receivedList, setReceivedList] = useState<FriendRequest[]>([])
   const [sendedList, setSendedList] = useState<FriendRequest[]>([])
 
-  const { setOptions } = useNavigation<FriendRequestStackPropHook>()
+  const { setOptions, navigate } = useNavigation<FriendRequestStackPropHook>()
 
   useLayoutEffect(() => {
     setOptions({ title: 'Friend requests' })
@@ -79,36 +80,45 @@ function FriendRequestScreen() {
   return (
     <>
       <Spinner visible={receivedQuery.isLoading && sendedQuery.isLoading} />
+
       <View style={styles.container}>
-        {!receivedList.length && !sendedList.length ? (
-          <View style={styles.emptyTextWrapper}>
-            <Text style={styles.emptyText}>
-              You don&apos;t have any friend requests
-            </Text>
-          </View>
-        ) : (
-          <View>
-            {receivedList.length ? (
-              <FriendRequestList
-                friendRequests={receivedList}
-                isReceived={true}
-              />
-            ) : (
-              <Text style={styles.receivedEmptyText}>
-                You don&apos;t have any received friend requests
+        <Search
+          placeholder="Search user"
+          onPress={() => {
+            navigate('SearchUser')
+          }}
+        />
+        <View style={styles.wrapper}>
+          {!receivedList.length && !sendedList.length ? (
+            <View style={styles.emptyTextWrapper}>
+              <Text style={styles.emptyText}>
+                You don&apos;t have any friend requests
               </Text>
-            )}
-            {!!sendedList.length && (
-              <>
-                <Text style={styles.title}>Your requesting</Text>
+            </View>
+          ) : (
+            <View>
+              {receivedList.length ? (
                 <FriendRequestList
-                  friendRequests={sendedList}
-                  isReceived={false}
+                  friendRequests={receivedList}
+                  isReceived={true}
                 />
-              </>
-            )}
-          </View>
-        )}
+              ) : (
+                <Text style={styles.receivedEmptyText}>
+                  You don&apos;t have any received friend requests
+                </Text>
+              )}
+              {!!sendedList.length && (
+                <>
+                  <Text style={styles.title}>Your requesting</Text>
+                  <FriendRequestList
+                    friendRequests={sendedList}
+                    isReceived={false}
+                  />
+                </>
+              )}
+            </View>
+          )}
+        </View>
       </View>
     </>
   )
@@ -119,8 +129,11 @@ export default FriendRequestScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
     backgroundColor: Colors.background,
+  },
+  wrapper: {
+    paddingHorizontal: 16,
+    flex: 1,
   },
   emptyTextWrapper: {
     flex: 1,

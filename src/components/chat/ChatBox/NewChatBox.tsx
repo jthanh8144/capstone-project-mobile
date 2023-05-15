@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react'
-import { FlatList, Image, StyleSheet, TextInput, View } from 'react-native'
+import React, { useCallback, useContext, useState } from 'react'
+import { FlatList, Image, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -9,39 +9,70 @@ import {
 } from 'react-native-image-picker'
 import Modal from 'react-native-modal'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
-import { SessionCipher } from '@privacyresearch/libsignal-protocol-typescript'
+import {
+  SessionBuilder,
+  SessionCipher,
+  SignalProtocolAddress,
+} from '@privacyresearch/libsignal-protocol-typescript'
 import { TextEncoder } from 'text-encoding'
 import { Buffer } from 'buffer'
+import Spinner from 'react-native-loading-spinner-overlay'
 
-import IconButton from '../ui/IconButton'
-import TextButton from '../ui/TextButton'
-import Button from '../ui/Button'
-import { PLUS, SEND, X_MARK } from '../../constants/icons'
-import { Colors } from '../../constants/colors'
-import { MessageTypeEnum } from '../../types'
-import { getPresignedUrl, sendMessage } from '../../services/http'
-import { LocalMessageRepository } from '../../services/database'
-import { uploadFileToPresignedUrl } from '../../services/http'
-import { AppContext } from '../../store/app-context'
-import Base64 from '../../utils/base64'
+import IconButton from '../../ui/IconButton'
+import TextButton from '../../ui/TextButton'
+import Button from '../../ui/Button'
+import { PLUS, SEND, X_MARK } from '../../../constants/icons'
+import { Colors } from '../../../constants/colors'
+import { MessageTypeEnum, NewChatStackPropHook } from '../../../types'
+import {
+  getConservationSetting,
+  getPresignedUrl,
+  newConservation,
+} from '../../../services/http'
+import { LocalMessageRepository } from '../../../services/database'
+import { uploadFileToPresignedUrl } from '../../../services/http'
+import { AppContext } from '../../../store/app-context'
+import Base64 from '../../../utils/base64'
+import { styles } from './styles'
+import { User } from '../../../models/user'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { base64ToArrayBuffer } from '../../../utils'
+import { useNavigation } from '@react-navigation/native'
 
-function ChatBox({
-  conservationId,
-  sessionCipher,
-  localMessageRepository,
-}: {
-  conservationId: string
-  sessionCipher: SessionCipher
-  localMessageRepository: LocalMessageRepository
-}) {
-  const { setLocalMessages } = useContext(AppContext)
+function NewChatBox({ user }: { user: User }) {
+  const { replace } = useNavigation<NewChatStackPropHook>()
+
+  const { signalStore, setLocalMessages } = useContext(AppContext)
 
   const [text, setText] = useState('')
   const [files, setFiles] = useState<Array<Asset>>([])
   const [type] = useState(MessageTypeEnum.text)
   const [isShowModal, setIsShowModel] = useState(false)
 
-  const queryClient = useQueryClient()
+  const getSessionCipher = useCallback(async () => {
+    const deviceId = (await AsyncStorage.getItem('deviceId')) || '0'
+    const address = new SignalProtocolAddress(user.id, +deviceId)
+    const sessionBuilder = new SessionBuilder(signalStore, address)
+    if (!signalStore.get(`identityKey${address.getName()}`, undefined)) {
+      await sessionBuilder.processPreKey({
+        registrationId: user.signalStore.registrationId,
+        identityKey: base64ToArrayBuffer(user.signalStore.ikPublicKey),
+        preKey: {
+          keyId: user.signalStore.pkKeyId,
+          publicKey: base64ToArrayBuffer(user.signalStore.pkPublicKey),
+        },
+        signedPreKey: {
+          keyId: user.signalStore.spkKeyId,
+          publicKey: base64ToArrayBuffer(user.signalStore.spkPublicKey),
+          signature: base64ToArrayBuffer(user.signalStore.spkSignature),
+        },
+      })
+    }
+    return new SessionCipher(signalStore, address)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const { invalidateQueries } = useQueryClient()
 
   const { mutate, isLoading } = useMutation(
     async ({
@@ -55,34 +86,44 @@ function ChatBox({
       encryptType: number
       url?: string
     }) => {
-      const { messageId } = await sendMessage(
-        conservationId,
+      const { conservationId, messageId } = await newConservation({
+        receiverId: user.id,
         message,
         messageType,
         encryptType,
-      )
+      })
       const data = url || text.trim()
       setText('')
-      return [messageId, data]
+      return { conservationId, messageId, data }
     },
     {
-      onSuccess: async data => {
+      onSuccess: async ({ conservationId, messageId, data }) => {
+        const localMessageRepository = new LocalMessageRepository()
         await localMessageRepository.saveMessage(
           conservationId,
-          data[0],
-          data[1],
+          messageId,
+          data,
         )
-        await Promise.all([
-          // queryClient.invalidateQueries([`local_messages_${conservationId}`]),
+        const [sessionCipher, setting] = await Promise.all([
+          getSessionCipher(),
+          (async () => {
+            const res = await getConservationSetting(conservationId)
+            return res.setting
+          })(),
           (async () => {
             const res = await localMessageRepository.getMessagesOfConservation(
               conservationId,
             )
             setLocalMessages(res)
           })(),
-          queryClient.invalidateQueries([`conservation_${conservationId}`]),
-          queryClient.invalidateQueries(['conservations']),
         ])
+        replace('Chat', {
+          id: conservationId,
+          sessionCipher,
+          user,
+          setting,
+        })
+        await invalidateQueries(['conservations'])
       },
     },
   )
@@ -112,6 +153,7 @@ function ChatBox({
   }
 
   const handleSendMessage = async () => {
+    const sessionCipher = await getSessionCipher()
     if (text.trim()) {
       const buffer = new TextEncoder().encode(text.trim()).buffer
       const cipherText = await sessionCipher.encrypt(buffer)
@@ -152,6 +194,7 @@ function ChatBox({
 
   return (
     <>
+      <Spinner visible={isLoading} />
       {files.length > 0 && (
         <View style={styles.attachmentsContainer}>
           <FlatList
@@ -226,58 +269,4 @@ function ChatBox({
   )
 }
 
-export default ChatBox
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: 'whitesmoke',
-    padding: 5,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-  },
-  input: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 5,
-    paddingHorizontal: 10,
-    marginHorizontal: 10,
-
-    borderRadius: 50,
-    borderColor: 'lightgray',
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  send: {
-    backgroundColor: 'royalblue',
-    padding: 7,
-    borderRadius: 15,
-    overflow: 'hidden',
-  },
-  cancelWrapper: {
-    alignItems: 'center',
-    marginTop: 15,
-  },
-  attachmentsContainer: {
-    alignItems: 'flex-end',
-  },
-  selectedImage: {
-    height: 100,
-    width: 200,
-    margin: 5,
-  },
-  progressImage: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    backgroundColor: '#8c8c8cAA',
-    padding: 5,
-    borderRadius: 50,
-  },
-  removeSelectedImage: {
-    position: 'absolute',
-    right: 10,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-})
+export default NewChatBox

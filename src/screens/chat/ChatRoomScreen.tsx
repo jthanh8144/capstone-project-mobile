@@ -17,7 +17,7 @@ import Spinner from 'react-native-loading-spinner-overlay'
 
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
 import Message from '../../components/chat/Message'
-import ChatBox from '../../components/chat/ChatBox'
+import ChatBox from '../../components/chat/ChatBox/ChatBox'
 import { Message as MessageModel } from '../../models/message'
 import { LIMIT_CHAT_SELECTED } from '../../constants/limit'
 import { getConservation } from '../../services/http'

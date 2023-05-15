@@ -5,6 +5,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import jwtDecode from 'jwt-decode'
 import SplashScreen from 'react-native-splash-screen'
 import { getUniqueIdSync } from 'react-native-device-info'
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { PortalProvider } from '@gorhom/portal'
+import { StyleSheet } from 'react-native'
 
 import NonAuthenticatedStack from './NonAuthenticatedStack'
 import AuthenticatedStack from './AuthenticatedStack'
@@ -55,9 +59,20 @@ function MainNavigation() {
   }, [])
 
   return (
-    <NavigationContainer>
-      {isAuthenticated ? <AuthenticatedStack /> : <NonAuthenticatedStack />}
-    </NavigationContainer>
+    <PortalProvider>
+      <NavigationContainer>
+        <GestureHandlerRootView
+          style={StyleSheet.create({ container: { flex: 1 } }).container}>
+          <BottomSheetModalProvider>
+            {isAuthenticated ? (
+              <AuthenticatedStack />
+            ) : (
+              <NonAuthenticatedStack />
+            )}
+          </BottomSheetModalProvider>
+        </GestureHandlerRootView>
+      </NavigationContainer>
+    </PortalProvider>
   )
 }
 

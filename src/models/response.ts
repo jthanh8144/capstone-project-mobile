@@ -1,5 +1,6 @@
 import { Conservation } from './conservation'
 import { FriendRequest } from './friend-request'
+import { ConservationSetting } from './conservation'
 import { Message } from './message'
 import { User } from './user'
 
@@ -59,4 +60,25 @@ export type GetDeviceId = {
 export type SendMessageResponse = {
   success: boolean
   messageId: string
+}
+
+export type ConservationWithUser = {
+  existed: boolean
+  data: Conservation | null
+}
+
+export type NewConservationResponse = {
+  success: boolean
+  conservationId: string
+  messageId: string
+}
+
+export type ConservationSettingResponse = {
+  success: boolean
+  setting: ConservationSetting
+}
+
+export type SearchUserResponse = {
+  success: boolean
+  users: User[]
 }

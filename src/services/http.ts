@@ -1,4 +1,10 @@
-import { SendMessageResponse } from './../models/response'
+import {
+  ConservationSettingResponse,
+  ConservationWithUser,
+  NewConservationResponse,
+  SearchUserResponse,
+  SendMessageResponse,
+} from './../models/response'
 import axios from 'axios'
 import { axiosPublic, axiosPrivate } from './axios'
 import {
@@ -181,9 +187,11 @@ export async function sendFriendRequest(receiverId: string) {
   }
 }
 
-export async function getFriendsList() {
+export async function getFriendsList(page?: number, name?: string) {
   try {
-    const res = await axiosPrivate.get<FriendsListResponse>('/users/friends')
+    const res = await axiosPrivate.get<FriendsListResponse>('/users/friends', {
+      params: { page, name },
+    })
     return res.data
   } catch (err) {
     throw err
@@ -258,6 +266,56 @@ export async function postSignalKey(data: {
 }) {
   try {
     const res = await axiosPrivate.post<ApiResponse>('/users/signal', data)
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function getConservationWith(partnerId: string) {
+  try {
+    const res = await axiosPrivate.get<ConservationWithUser>(
+      `/users/conservations/${partnerId}`,
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function newConservation(data: {
+  receiverId: string
+  message: string
+  messageType: MessageTypeEnum
+  encryptType: number
+}) {
+  try {
+    const res = await axiosPrivate.post<NewConservationResponse>(
+      '/conservations',
+      data,
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function getConservationSetting(conservationId: string) {
+  try {
+    const res = await axiosPrivate.get<ConservationSettingResponse>(
+      `/conservations/${conservationId}/settings`,
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function searchUser(q: string) {
+  try {
+    const res = await axiosPrivate.get<SearchUserResponse>('/users', {
+      params: { q },
+    })
     return res.data
   } catch (err) {
     throw err
