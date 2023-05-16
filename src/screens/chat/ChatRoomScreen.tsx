@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import Spinner from 'react-native-loading-spinner-overlay'
+import { HeaderButtonProps } from '@react-navigation/native-stack/lib/typescript/src/types'
 
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
 import Message from '../../components/chat/Message'
@@ -25,6 +26,8 @@ import { images } from '../../assets/images'
 import { ChatStackProp } from '../../types'
 import { LocalMessageRepository } from '../../services/database'
 import { AppContext } from '../../store/app-context'
+import IconButton from '../../components/ui/IconButton'
+import { MORE } from '../../constants/icons'
 
 function ChatRoomScreen({ route, navigation }: ChatStackProp) {
   const conservationId = route.params.id
@@ -57,9 +60,30 @@ function ChatRoomScreen({ route, navigation }: ChatStackProp) {
     [localMessages],
   )
 
+  const renderRightIcon = useCallback(
+    ({ tintColor }: HeaderButtonProps) => {
+      return (
+        <IconButton
+          svgText={MORE}
+          color={tintColor}
+          onPress={() => {
+            navigation.navigate('ChatRoomSetting', {
+              user: route.params.user,
+              setting: route.params.setting,
+            })
+          }}
+        />
+      )
+    },
+    [navigation, route],
+  )
+
   useLayoutEffect(() => {
-    navigation.setOptions({ title: route.params.user.fullName || '' })
-  }, [navigation, route.params.user.fullName])
+    navigation.setOptions({
+      title: route.params.user.fullName || '',
+      headerRight: renderRightIcon,
+    })
+  }, [navigation, renderRightIcon, route.params.user.fullName])
 
   const {
     isLoading,
