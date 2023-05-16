@@ -42,6 +42,10 @@ export type AuthenticatedStackParamList = {
   }
   SearchConservation: undefined
   SearchUser: undefined
+  ChatRoomSetting: {
+    user: User
+    setting: ConservationSetting
+  }
 }
 
 export type ProfileStackPropHook = NativeStackNavigationProp<
@@ -102,4 +106,9 @@ export type SearchConservationStackProp = NativeStackScreenProps<
 export type SearchUserStackProp = NativeStackScreenProps<
   AuthenticatedStackParamList,
   'SearchUser'
+>
+
+export type ChatRoomSettingStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'ChatRoomSetting'
 >

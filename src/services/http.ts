@@ -321,3 +321,22 @@ export async function searchUser(q: string) {
     throw err
   }
 }
+
+export async function updateConservationSetting(
+  id: string,
+  data: {
+    isMuted?: boolean
+    isRemoved?: boolean
+    isArchived?: boolean
+  },
+) {
+  try {
+    const res = await axiosPrivate.put<ApiResponse>(
+      `/conservations/settings/${id}`,
+      data,
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}

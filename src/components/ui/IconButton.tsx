@@ -18,7 +18,9 @@ function IconButton({
   onPress: PressFunction
 }) {
   const styles = StyleSheet.create({
-    container: {},
+    container: {
+      alignItems: 'center',
+    },
     pressed: {
       opacity: 0.7,
     },
@@ -26,6 +28,9 @@ function IconButton({
       padding: 8,
       borderRadius: 100,
       backgroundColor,
+    },
+    icon: {
+      alignItems: 'center',
     },
   })
 
@@ -37,7 +42,7 @@ function IconButton({
         pressed && styles.pressed,
         !!backgroundColor && styles.btn,
       ]}>
-      <Icon size={size} svgText={svgText} color={color} />
+      <Icon size={size} svgText={svgText} color={color} style={styles.icon} />
     </Pressable>
   )
 }
