@@ -1,7 +1,11 @@
 import React, { useContext, useLayoutEffect, useState } from 'react'
 import { Platform, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { useQueries, useQueryClient } from '@tanstack/react-query'
+import {
+  useInfiniteQuery,
+  useQueries,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { io } from 'socket.io-client'
 // import Config from 'react-native-config'
 import { useNavigation } from '@react-navigation/native'
@@ -11,17 +15,17 @@ import ChatList from '../../components/chat/ChatList'
 import Search from '../../components/ui/Search'
 import { getConservations, getUserProfile } from '../../services/http'
 import { AppContext } from '../../store/app-context'
-import { Conservation } from '../../models/conservation'
 import { useRefreshByUser } from '../../hooks'
 import { Colors } from '../../constants/colors'
 import { ChatListStackPropHook, OnMessageData } from '../../types'
+import { ConservationsResponse } from '../../models/response'
 
 function ChatListScreen() {
   const { setOptions, navigate } = useNavigation<ChatListStackPropHook>()
 
   const { user, setUser } = useContext(AppContext)
 
-  const [conservations, setConservations] = useState<Conservation[]>([])
+  const [page, setPage] = useState(1)
 
   useLayoutEffect(() => {
     setOptions({ title: 'Safe talk' })
@@ -41,7 +45,7 @@ function ChatListScreen() {
     }
   }
 
-  const [profileQuery, conservationsQuery] = useQueries({
+  const [profileQuery] = useQueries({
     queries: [
       {
         queryKey: ['profile'],
@@ -70,22 +74,36 @@ function ChatListScreen() {
         //   console.log(error)
         // },
       },
-      {
-        queryKey: ['conservations'],
-        queryFn: async () => {
-          try {
-            const res = await getConservations()
-            if (res && res.conservations) {
-              setConservations(res.conservations)
-            }
-            return res
-          } catch (err: any) {
-            throw new Error(err.message)
-          }
-        },
-      },
     ],
   })
+
+  const conservationsQuery = useInfiniteQuery<ConservationsResponse>(
+    ['conservations'],
+    async ({ pageParam = 1 }: { pageParam?: number }) => {
+      try {
+        return await getConservations(pageParam)
+      } catch (err: any) {
+        throw new Error(err?.message)
+      }
+    },
+    {
+      getNextPageParam: ({ nextPage }) => nextPage,
+    },
+  )
+  const handleLoadMore = async () => {
+    if (
+      !conservationsQuery.isLoading &&
+      !conservationsQuery.isFetchingNextPage &&
+      conservationsQuery.hasNextPage
+    ) {
+      conservationsQuery.fetchNextPage({ pageParam: page + 1 })
+      setPage(prevPage => prevPage + 1)
+    }
+  }
+  const conservations =
+    conservationsQuery.data?.pages.flatMap(
+      pageData => pageData.conservations,
+    ) || []
 
   const { isRefetchingByUser, refetchByUser } = useRefreshByUser(
     conservationsQuery.refetch,
@@ -113,7 +131,7 @@ function ChatListScreen() {
   return (
     <>
       <Spinner
-        visible={profileQuery.isLoading && conservationsQuery.isLoading}
+        visible={profileQuery.isLoading || conservationsQuery.isLoading}
       />
       <View style={styles.container}>
         {conservations.length ? (
@@ -133,6 +151,7 @@ function ChatListScreen() {
                   onRefresh={refetchByUser}
                 />
               }
+              onLoadMore={handleLoadMore}
             />
           </>
         ) : (

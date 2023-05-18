@@ -133,10 +133,11 @@ export async function removeUser(password: string) {
   }
 }
 
-export async function getReceivedFriendRequests() {
+export async function getReceivedFriendRequests(page?: number) {
   try {
     const res = await axiosPrivate.get<FriendRequestResponse>(
       '/friend-requests/received',
+      { params: { page } },
     )
     return res.data
   } catch (err) {
@@ -144,10 +145,11 @@ export async function getReceivedFriendRequests() {
   }
 }
 
-export async function getSendedFriendRequests() {
+export async function getSendedFriendRequests(page?: number) {
   try {
     const res = await axiosPrivate.get<FriendRequestResponse>(
       '/friend-requests/sended',
+      { params: { page } },
     )
     return res.data
   } catch (err) {
@@ -198,10 +200,11 @@ export async function getFriendsList(page?: number, name?: string) {
   }
 }
 
-export async function getConservations() {
+export async function getConservations(page?: number) {
   try {
     const res = await axiosPrivate.get<ConservationsResponse>(
       '/users/conservations',
+      { params: { page } },
     )
     return res.data
   } catch (err) {
@@ -212,12 +215,10 @@ export async function getConservations() {
 export async function getConservation(conservationId: string, page = 1) {
   try {
     const res = await axiosPrivate.get<DetailConservationResponse>(
-      `/conservations/${conservationId}?page=${page}`,
+      `/conservations/${conservationId}`,
+      { params: { page } },
     )
-    return {
-      ...res.data,
-      nextPage: res.data.totalPage === page ? undefined : page + 1,
-    }
+    return res.data
   } catch (err) {
     throw err
   }
@@ -311,10 +312,10 @@ export async function getConservationSetting(conservationId: string) {
   }
 }
 
-export async function searchUser(q: string) {
+export async function searchUser(q: string, page = 1) {
   try {
     const res = await axiosPrivate.get<SearchUserResponse>('/users', {
-      params: { q },
+      params: { q, page },
     })
     return res.data
   } catch (err) {

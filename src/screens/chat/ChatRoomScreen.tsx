@@ -105,8 +105,7 @@ function ChatRoomScreen({ route, navigation }: ChatStackProp) {
     [`conservation_${conservationId}`],
     async ({ pageParam = 1 }: { pageParam?: number }) => {
       try {
-        const res = await getConservation(conservationId, pageParam)
-        return res
+        return await getConservation(conservationId, pageParam)
       } catch (err: any) {
         throw new Error(err?.message)
       }
