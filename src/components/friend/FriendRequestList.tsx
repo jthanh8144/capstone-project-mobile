@@ -1,7 +1,8 @@
 import React, { ReactElement } from 'react'
-import { FlatList, ListRenderItemInfo } from 'react-native'
+import { FlatList, ListRenderItemInfo, StyleSheet } from 'react-native'
 import { FriendRequest } from '../../models/friend-request'
 import FriendRequestItem from './FriendRequestItem'
+import { PromiseVoidFunction } from '../../types'
 
 function renderReceived(itemData: ListRenderItemInfo<FriendRequest>) {
   const { item } = itemData
@@ -17,10 +18,12 @@ function FriendRequestList({
   friendRequests,
   isReceived,
   refreshControl,
+  onLoadMore,
 }: {
   friendRequests: FriendRequest[]
   isReceived: boolean
   refreshControl?: ReactElement
+  onLoadMore?: PromiseVoidFunction
 }) {
   return (
     <FlatList
@@ -28,8 +31,17 @@ function FriendRequestList({
       renderItem={isReceived ? renderReceived : renderSended}
       keyExtractor={item => item.id}
       refreshControl={refreshControl}
+      onEndReached={onLoadMore}
+      onEndReachedThreshold={0.2}
+      style={styles.container}
     />
   )
 }
 
 export default FriendRequestList
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+})

@@ -5,10 +5,10 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
 } from '@gorhom/bottom-sheet'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import Spinner from 'react-native-loading-spinner-overlay'
 
-import { User } from '../../models/user'
+import { FriendsListResponse } from '../../models/response'
 import { getFriendsList } from '../../services/http'
 import FriendList from '../friend/FriendList'
 import { useDebounce } from '../../hooks'
@@ -19,28 +19,51 @@ export default function NewChat({
   bottomSheetRef: MutableRefObject<BottomSheet>
 }) {
   const [value, setValue] = useState('')
-  const [friendsList, setFriendsList] = useState<User[]>([])
+  const [page, setPage] = useState(1)
 
   const debouncedValue = useDebounce(value, 200)
 
   const snapPoints = useMemo(() => ['80%'], [])
 
-  const { isLoading, refetch } = useQuery<User[], Error>(
-    ['friendsList'],
-    async () => {
+  const {
+    isLoading,
+    isFetchingNextPage,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    data,
+  } = useInfiniteQuery<FriendsListResponse, Error>(
+    ['searchConservation'],
+    async ({ pageParam = 1 }: { pageParam?: number }) => {
       try {
-        const res = await getFriendsList(1, debouncedValue)
-        if (res.friends) {
-          setFriendsList(res.friends)
+        if (debouncedValue) {
+          return await getFriendsList(pageParam, debouncedValue)
+        } else {
+          return {
+            success: false,
+            nextPage: undefined,
+            friends: [],
+            totalPage: 0,
+          }
         }
-        return res.friends
-      } catch (err: any) {
+      } catch (err) {
         throw new Error(err?.message)
       }
     },
+    {
+      getNextPageParam: ({ nextPage }) => nextPage,
+    },
   )
+  const handleLoadMore = async () => {
+    if (!isLoading && !isFetchingNextPage && hasNextPage) {
+      fetchNextPage({ pageParam: page + 1 })
+      setPage(prevPage => prevPage + 1)
+    }
+  }
+  const friends = data?.pages.flatMap(pageData => pageData.friends) || []
 
   useEffect(() => {
+    setPage(1)
     refetch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedValue])
@@ -73,10 +96,11 @@ export default function NewChat({
               />
             </View>
             <FriendList
-              friends={friendsList}
+              friends={friends}
               onPressItem={() => {
                 bottomSheetRef.current.close()
               }}
+              onLoadMore={handleLoadMore}
             />
           </View>
         </BottomSheet>

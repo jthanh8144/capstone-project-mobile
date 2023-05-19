@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-import { useQueries } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import Spinner from 'react-native-loading-spinner-overlay'
 
 import FriendRequestList from '../../components/friend/FriendRequestList'
@@ -12,12 +12,12 @@ import {
   getReceivedFriendRequests,
   getSendedFriendRequests,
 } from '../../services/http'
-import { FriendRequest } from '../../models/friend-request'
 import Search from '../../components/ui/Search'
+import { FriendRequestResponse } from '../../models/response'
 
 function FriendRequestScreen() {
-  const [receivedList, setReceivedList] = useState<FriendRequest[]>([])
-  const [sendedList, setSendedList] = useState<FriendRequest[]>([])
+  const [receivedPage, setReceivedPage] = useState(1)
+  const [sendedPage, setSendedPage] = useState(1)
 
   const { setOptions, navigate } = useNavigation<FriendRequestStackPropHook>()
 
@@ -25,38 +25,57 @@ function FriendRequestScreen() {
     setOptions({ title: 'Friend requests' })
   }, [setOptions])
 
-  const [receivedQuery, sendedQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ['receivedFriendRequests'],
-        queryFn: async () => {
-          try {
-            const res = await getReceivedFriendRequests()
-            if (res && res.friendRequests) {
-              setReceivedList(res.friendRequests)
-            }
-            return res
-          } catch (err: any) {
-            throw new Error(err.message)
-          }
-        },
-      },
-      {
-        queryKey: ['sendedFriendRequests'],
-        queryFn: async () => {
-          try {
-            const res = await getSendedFriendRequests()
-            if (res && res.friendRequests) {
-              setSendedList(res.friendRequests)
-            }
-            return res
-          } catch (err: any) {
-            throw new Error(err.message)
-          }
-        },
-      },
-    ],
-  })
+  const receivedQuery = useInfiniteQuery<FriendRequestResponse, Error>(
+    ['receivedFriendRequests'],
+    async ({ pageParam = 1 }: { pageParam?: number }) => {
+      try {
+        return await getReceivedFriendRequests(pageParam)
+      } catch (err) {
+        throw new Error(err?.message)
+      }
+    },
+    {
+      getNextPageParam: ({ nextPage }) => nextPage,
+    },
+  )
+  const handleLoadMoreReceived = async () => {
+    if (
+      !receivedQuery.isLoading &&
+      !receivedQuery.isFetchingNextPage &&
+      receivedQuery.hasNextPage
+    ) {
+      receivedQuery.fetchNextPage({ pageParam: receivedPage + 1 })
+      setReceivedPage(prevPage => prevPage + 1)
+    }
+  }
+  const receivedList =
+    receivedQuery.data?.pages.flatMap(pageData => pageData.friendRequests) || []
+
+  const sendedQuery = useInfiniteQuery<FriendRequestResponse, Error>(
+    ['sendedFriendRequests'],
+    async ({ pageParam = 1 }: { pageParam?: number }) => {
+      try {
+        return await getSendedFriendRequests(pageParam)
+      } catch (err) {
+        throw new Error(err?.message)
+      }
+    },
+    {
+      getNextPageParam: ({ nextPage }) => nextPage,
+    },
+  )
+  const handleLoadMoreSended = async () => {
+    if (
+      !sendedQuery.isLoading &&
+      !sendedQuery.isFetchingNextPage &&
+      sendedQuery.hasNextPage
+    ) {
+      sendedQuery.fetchNextPage({ pageParam: sendedPage + 1 })
+      setSendedPage(prevPage => prevPage + 1)
+    }
+  }
+  const sendedList =
+    sendedQuery.data?.pages.flatMap(pageData => pageData.friendRequests) || []
 
   if (
     (receivedQuery.isError && receivedQuery.error) ||
@@ -96,11 +115,12 @@ function FriendRequestScreen() {
               </Text>
             </View>
           ) : (
-            <View>
+            <>
               {receivedList.length ? (
                 <FriendRequestList
                   friendRequests={receivedList}
                   isReceived={true}
+                  onLoadMore={handleLoadMoreReceived}
                 />
               ) : (
                 <Text style={styles.receivedEmptyText}>
@@ -113,10 +133,11 @@ function FriendRequestScreen() {
                   <FriendRequestList
                     friendRequests={sendedList}
                     isReceived={false}
+                    onLoadMore={handleLoadMoreSended}
                   />
                 </>
               )}
-            </View>
+            </>
           )}
         </View>
       </View>

@@ -3,6 +3,7 @@ import { GestureResponderEvent } from 'react-native'
 
 export type PressFunction = (event: GestureResponderEvent) => void
 export type VoidFunction = () => void
+export type PromiseVoidFunction = () => Promise<void>
 
 export interface ChildProps {
   children: ReactNode

@@ -1,16 +1,16 @@
 import React, { useLayoutEffect, useState } from 'react'
 import { RefreshControl, StyleSheet, View } from 'react-native'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { useNavigation } from '@react-navigation/native'
 import Spinner from 'react-native-loading-spinner-overlay'
 
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
 import FriendList from '../../components/friend/FriendList'
-import { User } from '../../models/user'
 import { FriendListStackPropHook } from '../../types'
 import { getFriendsList } from '../../services/http'
 import { Colors } from '../../constants/colors'
 import { useRefreshByUser } from '../../hooks'
+import { FriendsListResponse } from '../../models/response'
 
 function FriendListScreen() {
   const { setOptions } = useNavigation<FriendListStackPropHook>()
@@ -18,21 +18,37 @@ function FriendListScreen() {
     setOptions({ title: 'Friends list' })
   }, [setOptions])
 
-  const [friendsList, setFriendsList] = useState<User[]>([])
-  const { isLoading, isError, refetch } = useQuery<User[], Error>(
+  const [page, setPage] = useState(1)
+
+  const {
+    isError,
+    isLoading,
+    isFetchingNextPage,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    data,
+  } = useInfiniteQuery<FriendsListResponse, Error>(
     ['friendsList'],
-    async () => {
+    async ({ pageParam = 1 }: { pageParam?: number }) => {
       try {
-        const res = await getFriendsList()
-        if (res.friends.length) {
-          setFriendsList(res.friends)
-        }
-        return res.friends
-      } catch (err: any) {
+        return await getFriendsList(pageParam)
+      } catch (err) {
         throw new Error(err?.message)
       }
     },
+    {
+      getNextPageParam: ({ nextPage }) => nextPage,
+    },
   )
+  const handleLoadMore = async () => {
+    if (!isLoading && !isFetchingNextPage && hasNextPage) {
+      fetchNextPage({ pageParam: page + 1 })
+      setPage(prevPage => prevPage + 1)
+    }
+  }
+  const friends = data?.pages.flatMap(pageData => pageData.friends) || []
+
   const { isRefetchingByUser, refetchByUser } = useRefreshByUser(refetch)
 
   if (isError) {
@@ -49,13 +65,14 @@ function FriendListScreen() {
       <Spinner visible={isLoading} />
       <View style={styles.container}>
         <FriendList
-          friends={friendsList}
+          friends={friends}
           refreshControl={
             <RefreshControl
               refreshing={isRefetchingByUser}
               onRefresh={refetchByUser}
             />
           }
+          onLoadMore={handleLoadMore}
         />
       </View>
     </>
@@ -67,7 +84,6 @@ export default FriendListScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 14,
     backgroundColor: Colors.background,
   },
 })

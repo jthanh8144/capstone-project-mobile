@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { SafeAreaView, Platform, StyleSheet, View } from 'react-native'
+import { SafeAreaView, Platform, StyleSheet } from 'react-native'
 import { SearchBar } from '@rneui/themed'
 
 import Icon from '../../components/ui/Icon'
@@ -7,39 +7,57 @@ import IconButton from '../../components/ui/IconButton'
 import SearchUserList from '../../components/search/SearchUserList'
 import { LEFT, SEARCH, X_MARK_THIN, X_MARK_IOS } from '../../constants/icons'
 import { SearchUserStackProp } from '../../types'
-import { User } from '../../models/user'
 import { useDebounce } from '../../hooks'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { searchUser } from '../../services/http'
+import { SearchUserResponse } from '../../models/response'
 
 export default function SearchUserScreen({ navigation }: SearchUserStackProp) {
   const ref = useRef(null)
   const [value, setValue] = useState('')
-  const [users, setUsers] = useState<User[]>([])
+  const [page, setPage] = useState(1)
 
   const debouncedValue = useDebounce(value, 200)
 
-  const { isLoading, refetch } = useQuery<User[], Error>(
+  const {
+    isLoading,
+    isFetchingNextPage,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    data,
+  } = useInfiniteQuery<SearchUserResponse, Error>(
     ['searchUser'],
-    async () => {
+    async ({ pageParam = 1 }: { pageParam?: number }) => {
       try {
         if (debouncedValue) {
-          const res = await searchUser(debouncedValue)
-          if (res.users) {
-            setUsers(res.users)
-          }
-          return res.users
+          return await searchUser(debouncedValue, pageParam)
         } else {
-          setUsers([])
-          return []
+          return {
+            success: false,
+            nextPage: undefined,
+            users: [],
+            totalPage: 0,
+          }
         }
-      } catch (err: any) {
+      } catch (err) {
         throw new Error(err?.message)
       }
     },
+    {
+      getNextPageParam: ({ nextPage }) => nextPage,
+    },
   )
+  const handleLoadMore = async () => {
+    if (!isLoading && !isFetchingNextPage && hasNextPage) {
+      fetchNextPage({ pageParam: page + 1 })
+      setPage(prevPage => prevPage + 1)
+    }
+  }
+  const users = data?.pages.flatMap(pageData => pageData.users) || []
 
   useEffect(() => {
+    setPage(1)
     refetch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedValue])
@@ -91,9 +109,7 @@ export default function SearchUserScreen({ navigation }: SearchUserStackProp) {
           showLoading={isLoading}
         />
       )}
-      <View style={styles.wrapper}>
-        <SearchUserList users={users} />
-      </View>
+      <SearchUserList users={users} onLoadMore={handleLoadMore} />
     </SafeAreaView>
   )
 }
@@ -101,9 +117,5 @@ export default function SearchUserScreen({ navigation }: SearchUserStackProp) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  wrapper: {
-    marginTop: 10,
-    paddingHorizontal: 12,
   },
 })

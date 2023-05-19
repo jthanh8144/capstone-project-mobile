@@ -34,21 +34,28 @@ export type PresignedUrlResponse = {
 export type FriendRequestResponse = {
   success: boolean
   friendRequests: FriendRequest[]
+  nextPage: number | undefined
+  totalPage: number
 }
 
 export type FriendsListResponse = {
   success: boolean
   friends: User[]
+  nextPage: number | undefined
+  totalPage: number
 }
 
 export type ConservationsResponse = {
   success: boolean
   conservations: Conservation[]
+  nextPage: number | undefined
+  totalPage: number
 }
 
 export type DetailConservationResponse = {
   success: boolean
   messages: Message[]
+  nextPage: number | undefined
   totalPage: number
 }
 
@@ -81,4 +88,6 @@ export type ConservationSettingResponse = {
 export type SearchUserResponse = {
   success: boolean
   users: User[]
+  nextPage: number | undefined
+  totalPage: number
 }
