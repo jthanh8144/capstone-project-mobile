@@ -1,5 +1,5 @@
 import React, { useContext, useLayoutEffect, useState } from 'react'
-import { Platform, RefreshControl, StyleSheet, Text, View } from 'react-native'
+import { RefreshControl, StyleSheet, Text, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import {
   useInfiniteQuery,
@@ -7,7 +7,6 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { io } from 'socket.io-client'
-// import Config from 'react-native-config'
 import { useNavigation } from '@react-navigation/native'
 
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
@@ -19,6 +18,7 @@ import { useRefreshByUser } from '../../hooks'
 import { Colors } from '../../constants/colors'
 import { ChatListStackPropHook, OnMessageData } from '../../types'
 import { ConservationsResponse } from '../../models/response'
+import { environments } from '../../configs/environment'
 
 function ChatListScreen() {
   const { setOptions, navigate } = useNavigation<ChatListStackPropHook>()
@@ -55,14 +55,9 @@ function ChatListScreen() {
             if (res && res.user) {
               setUser(res.user)
 
-              const socket = io(
-                Platform.OS === 'android'
-                  ? 'http://10.0.2.2:3000'
-                  : 'http://localhost:3000' || '',
-                {
-                  query: { roomId: res.user.id },
-                },
-              )
+              const socket = io(environments.apiUrl, {
+                query: { roomId: res.user.id },
+              })
               socket.on('message', handleOnNewMessage)
             }
             return res
