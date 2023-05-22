@@ -33,7 +33,7 @@ export default function NewChat({
     fetchNextPage,
     data,
   } = useInfiniteQuery<FriendsListResponse, Error>(
-    ['searchConservation'],
+    ['searchNewChat'],
     async ({ pageParam = 1 }: { pageParam?: number }) => {
       try {
         if (debouncedValue) {

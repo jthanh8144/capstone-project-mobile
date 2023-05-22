@@ -8,6 +8,7 @@ export type User = {
   avatarUrl: string | null
   isVerified: boolean
   isActive: boolean
+  isOnline: boolean
   createdAt?: Date
   updatedAt?: Date
   deletedAt?: Date | null

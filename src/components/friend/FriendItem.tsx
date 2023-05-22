@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Image, Pressable, StyleSheet, Text } from 'react-native'
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
 import {
@@ -88,14 +88,17 @@ function FriendItem({
       <Pressable
         style={({ pressed }) => [styles.container, pressed && styles.pressed]}
         onPress={handlePress}>
-        <Image
-          source={
-            friend?.avatarUrl
-              ? { uri: friend.avatarUrl }
-              : images.avatarPlaceholder
-          }
-          style={styles.image}
-        />
+        <View style={styles.imageWrapper}>
+          <Image
+            source={
+              friend?.avatarUrl
+                ? { uri: friend.avatarUrl }
+                : images.avatarPlaceholder
+            }
+            style={styles.image}
+          />
+          {friend.isOnline && <View style={styles.online} />}
+        </View>
         <Text style={styles.name}>{friend?.fullName}</Text>
       </Pressable>
     </>
@@ -113,17 +116,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  imageWrapper: {
+    position: 'relative',
+    marginRight: 12,
+  },
   image: {
     width: 42,
     height: 42,
     borderRadius: 21,
     borderWidth: 1,
     borderColor: Colors.gray,
-    marginRight: 12,
   },
   name: {
     fontSize: 18,
     fontWeight: '400',
     color: Colors.textDark,
+  },
+  online: {
+    position: 'absolute',
+    bottom: 1,
+    right: 1,
+    width: 10,
+    height: 10,
+    borderRadius: 10,
+    backgroundColor: Colors.primary,
   },
 })

@@ -13,6 +13,7 @@ import ErrorOverlay from '../../components/ui/ErrorOverlay'
 import ChatList from '../../components/chat/ChatList'
 import Search from '../../components/ui/Search'
 import { getConservations, getUserProfile } from '../../services/http'
+// import { navigationRef } from '../../navigation/MainNavigation'
 import { AppContext } from '../../store/app-context'
 import { useRefreshByUser } from '../../hooks'
 import { Colors } from '../../constants/colors'
@@ -40,6 +41,7 @@ function ChatListScreen() {
         queryClient.invalidateQueries([key]),
         queryClient.invalidateQueries(['conservations']),
       ])
+      // console.log(navigationRef?.current.getCurrentRoute())
     } catch (err) {
       console.log(err)
     }

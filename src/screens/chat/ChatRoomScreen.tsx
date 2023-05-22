@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -37,6 +38,7 @@ function ChatRoomScreen({ route, navigation }: ChatStackProp) {
 
   const [isFirstTime, setIsFirstTime] = useState(true)
   const [page, setPage] = useState(1)
+  const [messages, setMessages] = useState<MessageModel[]>([])
 
   const flatListRef = useRef<FlatList<MessageModel>>(null)
   const localMessageRepository = useRef<LocalMessageRepository | null>(null)
@@ -121,7 +123,10 @@ function ChatRoomScreen({ route, navigation }: ChatStackProp) {
       setPage(prevPage => prevPage + 1)
     }
   }
-  const messages = data?.pages.flatMap(pageData => pageData.messages) || []
+
+  useEffect(() => {
+    setMessages(data?.pages.flatMap(pageData => pageData.messages) || [])
+  }, [data])
 
   const handleScrollToBottom = () => {
     if (isFirstTime && messages?.length) {
