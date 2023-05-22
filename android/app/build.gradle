@@ -145,6 +145,9 @@ android {
             }
 
         }
+        variant.outputs.all {
+            outputFileName = "SafeTalk.apk"
+        }
     }
 }
 
