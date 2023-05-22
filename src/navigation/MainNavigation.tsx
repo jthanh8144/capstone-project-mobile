@@ -1,5 +1,8 @@
 import React, { useContext, useEffect } from 'react'
-import { NavigationContainer } from '@react-navigation/native'
+import {
+  NavigationContainer,
+  createNavigationContainerRef,
+} from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import jwtDecode from 'jwt-decode'
@@ -20,6 +23,7 @@ import { getFromLocalStorage } from '../utils'
 import { initializeDbConnection } from '../services/database'
 
 export const Stack = createNativeStackNavigator<StackParamList>()
+const navigationRef = createNavigationContainerRef()
 
 function MainNavigation() {
   const { setIsAuthenticated, logout, isAuthenticated } =
@@ -60,7 +64,7 @@ function MainNavigation() {
 
   return (
     <PortalProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <GestureHandlerRootView
           style={StyleSheet.create({ container: { flex: 1 } }).container}>
           <BottomSheetModalProvider>
@@ -77,3 +81,5 @@ function MainNavigation() {
 }
 
 export default MainNavigation
+
+export { navigationRef }

@@ -22,7 +22,7 @@ export default function SearchConservationScreen({
   const debouncedValue = useDebounce(value, 200)
 
   const { isLoading, refetch } = useQuery<User[], Error>(
-    ['friendsList'],
+    ['searchConservation'],
     async () => {
       try {
         const res = await getFriendsList(1, debouncedValue)
