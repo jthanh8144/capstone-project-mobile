@@ -87,7 +87,11 @@ function Message({
         styles.container,
         isMyMessage() ? styles.myMessage : styles.notMyMessage,
       ]}>
-      {message.messageType === MessageTypeEnum.text && <Text>{plainText}</Text>}
+      {message.messageType === MessageTypeEnum.text && (
+        <Text style={isMyMessage() ? styles.myMessageText : styles.messageText}>
+          {plainText}
+        </Text>
+      )}
       {message.messageType === MessageTypeEnum.image && (
         <View style={[styles.images, { width: imageContainerWidth }]}>
           <ImageAttachment url={plainText} />
@@ -127,6 +131,12 @@ const styles = StyleSheet.create({
   notMyMessage: {
     backgroundColor: Colors.background,
     alignSelf: 'flex-start',
+  },
+  myMessageText: {
+    color: Colors.black,
+  },
+  messageText: {
+    color: Colors.textDark,
   },
   images: {
     flexDirection: 'row',

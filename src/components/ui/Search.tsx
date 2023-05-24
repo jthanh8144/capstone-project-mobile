@@ -18,7 +18,7 @@ export default function Search({
       <Pressable
         style={({ pressed }) => [styles.container, pressed && styles.pressed]}
         onPress={onPress}>
-        <Icon svgText={SEARCH} size={28} />
+        <Icon svgText={SEARCH} size={28} color={Colors.textDark} />
         <Text style={styles.text}>{placeholder}</Text>
       </Pressable>
     </View>
@@ -42,5 +42,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     marginLeft: 8,
+    color: Colors.textDark,
   },
 })

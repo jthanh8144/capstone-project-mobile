@@ -90,5 +90,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 8,
     fontSize: 16,
+    color: Colors.textDark,
   },
 })

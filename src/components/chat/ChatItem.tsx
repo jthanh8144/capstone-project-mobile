@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
 import {
@@ -8,6 +8,7 @@ import {
   SignalProtocolAddress,
 } from '@privacyresearch/libsignal-protocol-typescript'
 import Spinner from 'react-native-loading-spinner-overlay'
+import FastImage from 'react-native-fast-image'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -20,6 +21,7 @@ import { ChatStackPropHook, MessageTypeEnum } from '../../types'
 import { base64ToArrayBuffer } from '../../utils'
 import { AppContext } from '../../store/app-context'
 import { LocalMessageRepository } from '../../services/database'
+import { Colors } from '../../constants/colors'
 
 function ChatItem({
   conservation,
@@ -86,7 +88,7 @@ function ChatItem({
     <>
       <Spinner visible={isLoading} />
       <Pressable style={styles.container} onPress={handlePress}>
-        <Image
+        <FastImage
           source={
             conservation.user.avatarUrl
               ? { uri: conservation.user.avatarUrl }
@@ -147,8 +149,9 @@ const styles = StyleSheet.create({
   name: {
     flex: 1,
     fontWeight: 'bold',
+    color: Colors.gray,
   },
   subTitle: {
-    color: 'gray',
+    color: Colors.gray,
   },
 })

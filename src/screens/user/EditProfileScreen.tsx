@@ -4,17 +4,21 @@ import React, {
   useLayoutEffect,
   useState,
 } from 'react'
-import { Image, Platform, Pressable, StyleSheet, View } from 'react-native'
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { PERMISSIONS } from 'react-native-permissions'
-import {
-  ImagePickerResponse,
-  launchCamera,
-  launchImageLibrary,
-} from 'react-native-image-picker'
+import { openCamera, openPicker, Image } from 'react-native-image-crop-picker'
+import FastImage from 'react-native-fast-image'
 import Modal from 'react-native-modal'
 import { Buffer } from 'buffer'
 
@@ -66,40 +70,37 @@ function EditProfileScreen({ navigation }: EditProfileStackProp) {
     setIsShowModel(true)
   }
 
-  const handleResponse = (response: ImagePickerResponse) => {
+  const handleResponse = (response: Image) => {
     setIsShowModel(false)
-    if (response.errorCode) {
-      Dialog.show({
-        type: ALERT_TYPE.DANGER,
-        title: 'Error',
-        textBody: 'Something is error!',
-        button: 'close',
-      })
-    } else if (response.assets) {
-      setAvatar(response.assets[0]?.uri)
-      setBase64Value(response.assets[0]?.base64 || '')
-      setIsAvatarChange(true)
-    }
+    setAvatar(response.path)
+    setBase64Value(response.data)
+    setIsAvatarChange(true)
   }
 
   const showCameraHandler = async () => {
-    const response = await launchCamera({
-      saveToPhotos: true,
-      mediaType: 'photo',
-      quality: 1,
-      includeBase64: true,
-      presentationStyle: 'fullScreen',
-    })
-    handleResponse(response)
+    try {
+      const response = await openCamera({
+        cropping: true,
+        width: 500,
+        height: 500,
+        mediaType: 'photo',
+        includeBase64: true,
+      })
+      handleResponse(response)
+    } catch (err) {}
   }
 
   const chooseInPhotoHandler = async () => {
-    const response = await launchImageLibrary({
-      mediaType: 'photo',
-      presentationStyle: 'fullScreen',
-      includeBase64: true,
-    })
-    handleResponse(response)
+    try {
+      const response = await openPicker({
+        cropping: true,
+        width: 500,
+        height: 500,
+        mediaType: 'photo',
+        includeBase64: true,
+      })
+      handleResponse(response)
+    } catch (err) {}
   }
 
   const { control, handleSubmit, getValues } = useForm<EditProfileFormData>({
@@ -190,38 +191,41 @@ function EditProfileScreen({ navigation }: EditProfileStackProp) {
   return (
     <>
       <Spinner visible={isLoading} />
-      <View style={styles.container}>
-        <View style={styles.wrapper}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={avatar ? { uri: avatar } : images.avatarPlaceholder}
-              style={styles.image}
-            />
-            <Pressable
-              onPress={editAvatarHandler}
-              style={({ pressed }) => [
-                styles.editAvatarBtn,
-                pressed && styles.pressed,
-              ]}>
-              <Icon svgText={CAMERA} size={20} color={Colors.primary} />
-            </Pressable>
+      <ScrollView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.wrapper}>
+            <View style={styles.imageContainer}>
+              <FastImage
+                source={avatar ? { uri: avatar } : images.avatarPlaceholder}
+                style={styles.image}
+              />
+              <Pressable
+                onPress={editAvatarHandler}
+                style={({ pressed }) => [
+                  styles.editAvatarBtn,
+                  pressed && styles.pressed,
+                ]}>
+                <Icon svgText={CAMERA} size={20} color={Colors.primary} />
+              </Pressable>
+            </View>
           </View>
-        </View>
-        <Input
-          control={control}
-          label="Email"
-          name="email"
-          isEditable={false}
-        />
-        <Input
-          control={control}
-          label="Full name"
-          name="fullName"
-          rules={{
-            required: true,
-          }}
-        />
-      </View>
+          <Input
+            control={control}
+            label="Email"
+            name="email"
+            isEditable={false}
+          />
+          <Input
+            control={control}
+            label="Full name"
+            name="fullName"
+            rules={{
+              required: true,
+            }}
+          />
+        </KeyboardAvoidingView>
+      </ScrollView>
       <Modal isVisible={isShowModal}>
         <View>
           <Button onPress={showCameraHandler}>Take a photo</Button>
