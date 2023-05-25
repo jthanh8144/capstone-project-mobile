@@ -1,18 +1,12 @@
 import React, { useContext, useState } from 'react'
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  Platform,
-} from 'react-native'
+import { Pressable, StyleSheet, Text, View, Platform } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import Dialog from 'react-native-dialog'
 import {
   ALERT_TYPE,
   Dialog as DialogNotification,
 } from 'react-native-alert-notification'
+import FastImage from 'react-native-fast-image'
 
 import {
   KEY,
@@ -77,7 +71,7 @@ function ProfileScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.wrapper}>
-        <Image
+        <FastImage
           source={
             user?.avatarUrl ? { uri: user.avatarUrl } : images.avatarPlaceholder
           }

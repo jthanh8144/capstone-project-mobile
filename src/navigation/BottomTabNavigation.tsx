@@ -14,6 +14,7 @@ import FriendListScreen from '../screens/friend/FriendListScreen'
 import ChatListScreen from '../screens/chat/ChatListScreen'
 import ProfileScreen from '../screens/user/ProfileScreen'
 import NewChat from '../components/chat/NewChat'
+import { isDarkMode } from '../utils'
 
 const ThemeScreen = () => {
   const ref = useRef<ICurvedBottomBarRef>(null)
@@ -54,6 +55,7 @@ const ThemeScreen = () => {
             headerShown: true,
             headerStyle: { backgroundColor: Colors.background },
             headerTitleAlign: 'left',
+            headerTitleStyle: { color: Colors.textDark },
             headerShadowVisible: false,
           }}
           shadowStyle={styles.shadow}
@@ -62,7 +64,7 @@ const ThemeScreen = () => {
           circlePosition="CENTER"
           height={65}
           circleWidth={50}
-          bgColor="white"
+          bgColor={Colors.background}
           borderTopLeftRight={true}
           initialRouteName="ChatList"
           renderCircle={({ routeName, selectedTab, navigate }) => (
@@ -154,7 +156,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   shadow: {
-    shadowColor: '#DDDDDD',
+    shadowColor: Colors.shadow,
     shadowOpacity: 1,
     shadowRadius: 5,
   },
@@ -164,13 +166,13 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
-    shadowColor: '#000',
+    backgroundColor: isDarkMode ? Colors.gray : Colors.background,
+    shadowColor: Colors.shadowDark,
     shadowOffset: {
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.2,
+    shadowOpacity: 1,
     shadowRadius: 1.41,
     elevation: 1,
     bottom: 28,
@@ -181,9 +183,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E8E8E8',
+    backgroundColor: Colors.backgroundDark,
     bottom: 18,
-    shadowColor: '#000',
+    shadowColor: Colors.shadowDark,
     shadowOffset: {
       width: 0,
       height: 1,

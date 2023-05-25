@@ -1,5 +1,6 @@
 import React from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
+import FastImage from 'react-native-fast-image'
 
 import { User } from '../../models/user'
 import { images } from '../../assets/images'
@@ -98,7 +99,7 @@ export default function SearchUserItem({ user }: { user: User }) {
 
   return (
     <View style={styles.container}>
-      <Image
+      <FastImage
         source={
           user?.avatarUrl ? { uri: user.avatarUrl } : images.avatarPlaceholder
         }

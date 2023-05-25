@@ -29,7 +29,7 @@ function PasswordInput({
   placeholder?: string
   secure?: boolean
   keyboardType?: KeyboardTypeOptions
-  control: Control<UpdatePasswordFormData>
+  control: Control<UpdatePasswordFormData, any>
   name: 'oldPassword' | 'newPassword' | 'confirmPassword'
   rules?: RegisterOptions
   isEditable?: boolean

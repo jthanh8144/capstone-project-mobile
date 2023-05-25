@@ -1,5 +1,7 @@
 import React from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
+import FastImage from 'react-native-fast-image'
+
 import { OnBoardingStackProp } from '../../types'
 import Button from '../../components/ui/Button'
 import { Colors } from '../../constants/colors'
@@ -17,7 +19,7 @@ function OnBoardingScreen({ navigation }: OnBoardingStackProp) {
   return (
     <View style={styles.container}>
       <View style={styles.wrapper}>
-        <Image source={images.icon} style={styles.logo} />
+        <FastImage source={images.icon} style={styles.logo} />
         <Text style={styles.appName}>Safe Talk</Text>
         <Text style={styles.description}>Simple Secure Reliable Messaging</Text>
         <View style={styles.button}>

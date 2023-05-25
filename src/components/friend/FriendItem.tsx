@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
 import {
@@ -8,6 +8,7 @@ import {
   SignalProtocolAddress,
 } from '@privacyresearch/libsignal-protocol-typescript'
 import Spinner from 'react-native-loading-spinner-overlay'
+import FastImage from 'react-native-fast-image'
 
 import { images } from '../../assets/images'
 import { Colors } from '../../constants/colors'
@@ -89,7 +90,7 @@ function FriendItem({
         style={({ pressed }) => [styles.container, pressed && styles.pressed]}
         onPress={handlePress}>
         <View style={styles.imageWrapper}>
-          <Image
+          <FastImage
             source={
               friend?.avatarUrl
                 ? { uri: friend.avatarUrl }

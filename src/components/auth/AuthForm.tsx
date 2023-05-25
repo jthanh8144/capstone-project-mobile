@@ -2,7 +2,7 @@ import React from 'react'
 import { ScrollView } from 'react-native'
 import { FieldErrors, useForm } from 'react-hook-form'
 
-import { LOCK, MAIL } from '../../constants/icons'
+import { LOCK, MAIL, PERSON } from '../../constants/icons'
 import { AuthFormData } from '../../types'
 import Button from '../ui/Button'
 import Input from './Input'
@@ -28,7 +28,7 @@ function AuthForm({
       {!isLogin && (
         <Input
           label="Full name"
-          icon={MAIL}
+          icon={PERSON}
           placeholder="Enter full name"
           control={control}
           name="fullName"

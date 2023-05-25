@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import FastImage from 'react-native-fast-image'
 
 import HorizontalItem from '../../components/chat/ChatSetting/HorizontalItem'
 import VerticalItem from '../../components/chat/ChatSetting/VerticalItem'
@@ -90,7 +91,7 @@ export default function ChatRoomSettingScreen({
       />
       <View style={styles.container}>
         <View style={styles.topWrapper}>
-          <Image
+          <FastImage
             source={
               user.avatarUrl
                 ? { uri: user.avatarUrl }

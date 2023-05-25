@@ -1,8 +1,9 @@
 import React from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import Spinner from 'react-native-loading-spinner-overlay'
+import FastImage from 'react-native-fast-image'
 
 import { FriendRequest } from '../../models/friend-request'
 import { CHECK, X_MARK } from '../../constants/icons'
@@ -103,7 +104,7 @@ function FriendRequestItem({
     <>
       <Spinner visible={isLoading} />
       <View style={styles.container}>
-        <Image
+        <FastImage
           source={
             user?.avatarUrl ? { uri: user.avatarUrl } : images.avatarPlaceholder
           }
@@ -175,6 +176,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   email: {
+    color: Colors.textDark,
     fontSize: 14,
     fontWeight: '300',
   },

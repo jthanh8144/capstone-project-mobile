@@ -12,6 +12,7 @@ import { FriendsListResponse } from '../../models/response'
 import { getFriendsList } from '../../services/http'
 import FriendList from '../friend/FriendList'
 import { useDebounce } from '../../hooks'
+import { Colors } from '../../constants/colors'
 
 export default function NewChat({
   bottomSheetRef,
@@ -82,7 +83,9 @@ export default function NewChat({
           snapPoints={snapPoints}
           enablePanDownToClose={true}
           backdropComponent={renderBackdrop}
-          style={styles.sheetContainer}>
+          style={styles.sheetContainer}
+          handleStyle={styles.topBar}
+          handleIndicatorStyle={styles.topBarIndicator}>
           <View style={styles.contentContainer}>
             <Text style={styles.bottomSheetTitle}>Add new message</Text>
             <View style={styles.inputWrapper}>
@@ -90,6 +93,7 @@ export default function NewChat({
               <TextInput
                 autoCapitalize="none"
                 placeholder="Enter name..."
+                placeholderTextColor={Colors.gray}
                 value={value}
                 onChangeText={text => setValue(text)}
                 style={styles.input}
@@ -126,25 +130,38 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 20,
+    backgroundColor: Colors.background,
   },
   bottomSheetTitle: {
     fontSize: 20,
     fontWeight: '500',
     textAlign: 'center',
+    color: Colors.gray,
+  },
+  topBar: {
+    backgroundColor: Colors.background,
+    borderColor: 'transparent',
+  },
+  topBarIndicator: {
+    backgroundColor: Colors.textDark,
+    borderColor: 'transparent',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 6,
     marginBottom: 10,
+    backgroundColor: Colors.background,
   },
   inputLabel: {
     fontSize: 16,
     marginRight: 6,
+    color: Colors.textDark,
   },
   input: {
     fontSize: 16,
     flex: 1,
     padding: 2,
+    color: Colors.textDark,
   },
 })

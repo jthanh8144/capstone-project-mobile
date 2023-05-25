@@ -16,7 +16,13 @@ const Stack = createNativeStackNavigator<AuthenticatedStackParamList>()
 
 function AuthenticatedStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        headerTitleStyle: { color: Colors.textDark },
+        headerTintColor: Colors.textDark,
+        headerStyle: { backgroundColor: Colors.background },
+      }}>
       <Stack.Screen name="Home" component={BottomTabNavigation} />
       <Stack.Screen
         name="EditProfile"
@@ -25,7 +31,6 @@ function AuthenticatedStack() {
           presentation: 'modal',
           headerShown: true,
           title: 'Edit Profile',
-          headerStyle: { backgroundColor: Colors.background },
           headerShadowVisible: false,
         }}
       />
@@ -36,7 +41,6 @@ function AuthenticatedStack() {
           presentation: 'modal',
           headerShown: true,
           title: 'Update Password',
-          headerStyle: { backgroundColor: Colors.background },
           headerShadowVisible: false,
         }}
       />
@@ -65,7 +69,6 @@ function AuthenticatedStack() {
         options={{
           headerShown: true,
           title: 'Conservation setting',
-          headerStyle: { backgroundColor: Colors.background },
           headerShadowVisible: false,
         }}
       />

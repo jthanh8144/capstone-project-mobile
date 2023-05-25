@@ -1,16 +1,17 @@
 import React, { useLayoutEffect } from 'react'
 import {
-  Image,
   ImageBackground,
   KeyboardAvoidingView,
   StyleSheet,
   Text,
   View,
 } from 'react-native'
+import FastImage from 'react-native-fast-image'
 
 import { images } from '../../assets/images'
 import NewChatBox from '../../components/chat/ChatBox/NewChatBox'
 import { NewChatStackProp } from '../../types'
+import { isDarkMode } from '../../utils'
 
 export default function NewChatScreen({ route, navigation }: NewChatStackProp) {
   const { user } = route.params
@@ -22,9 +23,13 @@ export default function NewChatScreen({ route, navigation }: NewChatStackProp) {
   return (
     <>
       <KeyboardAvoidingView style={styles.flexOne}>
-        <ImageBackground source={images.chatBackground} style={styles.flexOne}>
+        <ImageBackground
+          source={
+            isDarkMode ? images.chatBackgroundDark : images.chatBackground
+          }
+          style={styles.flexOne}>
           <View style={[styles.flexOne, styles.container]}>
-            <Image
+            <FastImage
               source={
                 user.avatarUrl
                   ? { uri: user.avatarUrl }

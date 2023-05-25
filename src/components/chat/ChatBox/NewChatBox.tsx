@@ -1,14 +1,9 @@
 import React, { useCallback, useContext, useState } from 'react'
-import { FlatList, Image, TextInput, View } from 'react-native'
+import { FlatList, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  Asset,
-  ImagePickerResponse,
-  launchImageLibrary,
-} from 'react-native-image-picker'
+import { openPicker, Image } from 'react-native-image-crop-picker'
 import Modal from 'react-native-modal'
-import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import {
   SessionBuilder,
   SessionCipher,
@@ -17,6 +12,7 @@ import {
 import { TextEncoder } from 'text-encoding'
 import { Buffer } from 'buffer'
 import Spinner from 'react-native-loading-spinner-overlay'
+import FastImage from 'react-native-fast-image'
 
 import IconButton from '../../ui/IconButton'
 import TextButton from '../../ui/TextButton'
@@ -45,9 +41,10 @@ function NewChatBox({ user }: { user: User }) {
   const { signalStore, setLocalMessages } = useContext(AppContext)
 
   const [text, setText] = useState('')
-  const [files, setFiles] = useState<Array<Asset>>([])
+  const [files, setFiles] = useState<Array<Image>>([])
   const [type] = useState(MessageTypeEnum.text)
   const [isShowModal, setIsShowModel] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const getSessionCipher = useCallback(async () => {
     const deviceId = (await AsyncStorage.getItem('deviceId')) || '0'
@@ -74,7 +71,7 @@ function NewChatBox({ user }: { user: User }) {
 
   const { invalidateQueries } = useQueryClient()
 
-  const { mutate, isLoading } = useMutation(
+  const { mutate } = useMutation(
     async ({
       message,
       messageType,
@@ -128,31 +125,23 @@ function NewChatBox({ user }: { user: User }) {
     },
   )
 
-  const handleResponse = (response: ImagePickerResponse) => {
+  const handleResponse = (response: Image[]) => {
     setIsShowModel(false)
-    if (response.errorCode) {
-      Dialog.show({
-        type: ALERT_TYPE.DANGER,
-        title: 'Error',
-        textBody: 'Something is error!',
-        button: 'close',
-      })
-    } else if (response.assets && response.assets.length) {
-      setFiles(response.assets)
-    }
+    setFiles(response)
   }
 
   const chooseInPhotoHandler = async () => {
-    const response = await launchImageLibrary({
-      mediaType: 'photo',
-      presentationStyle: 'fullScreen',
-      includeBase64: true,
-      selectionLimit: 1,
-    })
-    handleResponse(response)
+    try {
+      const response = await openPicker({
+        mediaType: 'photo',
+        includeBase64: true,
+      })
+      handleResponse([response])
+    } catch (err) {}
   }
 
   const handleSendMessage = async () => {
+    setIsLoading(true)
     const sessionCipher = await getSessionCipher()
     if (text.trim()) {
       const buffer = new TextEncoder().encode(text.trim()).buffer
@@ -166,14 +155,14 @@ function NewChatBox({ user }: { user: User }) {
     if (files.length) {
       const urls = await Promise.all(
         files.map(async file => {
-          console.log(file.type)
+          console.log(file.mime)
           const { url, presignedUrl } = await getPresignedUrl(
-            file.type?.split('/')[1] || 'png',
+            file.mime?.split('/')[1] || 'png',
             'message_file',
           )
           await uploadFileToPresignedUrl(
             presignedUrl,
-            Buffer.from(file.base64 || '', 'base64'),
+            Buffer.from(file.data || '', 'base64'),
           )
           return url
         }),
@@ -190,6 +179,7 @@ function NewChatBox({ user }: { user: User }) {
       }
       setFiles([])
     }
+    setIsLoading(false)
   }
 
   return (
@@ -201,9 +191,9 @@ function NewChatBox({ user }: { user: User }) {
             data={files}
             horizontal
             renderItem={({ item }) => (
-              <>
-                <Image
-                  source={{ uri: item.uri }}
+              <View style={styles.imageWrapper}>
+                <FastImage
+                  source={{ uri: item.path }}
                   style={styles.selectedImage}
                   resizeMode="contain"
                 />
@@ -215,12 +205,12 @@ function NewChatBox({ user }: { user: User }) {
                         existingFiles.filter(file => file !== item),
                       )
                     }
-                    size={20}
+                    size={14}
                     color={Colors.gray}
                     backgroundColor={Colors.white}
                   />
                 </View>
-              </>
+              </View>
             )}
           />
         </View>
@@ -232,12 +222,14 @@ function NewChatBox({ user }: { user: User }) {
           onPress={() => {
             setIsShowModel(true)
           }}
+          color={Colors.textDark}
         />
         <TextInput
           value={text}
           onChangeText={setText}
           style={styles.input}
           placeholder="Type your message..."
+          placeholderTextColor={Colors.gray}
         />
         <IconButton
           svgText={SEND}
