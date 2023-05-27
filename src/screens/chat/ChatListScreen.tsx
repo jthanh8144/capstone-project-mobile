@@ -1,5 +1,5 @@
 import React, { useContext, useLayoutEffect, useState } from 'react'
-import { RefreshControl, StyleSheet, Text, View } from 'react-native'
+import { Platform, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import {
   useInfiniteQuery,
@@ -8,12 +8,13 @@ import {
 } from '@tanstack/react-query'
 import { io } from 'socket.io-client'
 import { useNavigation } from '@react-navigation/native'
+import PushNotification from 'react-native-push-notification'
 
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
 import ChatList from '../../components/chat/ChatList'
 import Search from '../../components/ui/Search'
 import { getConservations, getUserProfile } from '../../services/http'
-// import { navigationRef } from '../../navigation/MainNavigation'
+import { navigationRef } from '../../navigation/MainNavigation'
 import { AppContext } from '../../store/app-context'
 import { useRefreshByUser } from '../../hooks'
 import { Colors } from '../../constants/colors'
@@ -41,7 +42,21 @@ function ChatListScreen() {
         queryClient.invalidateQueries([key]),
         queryClient.invalidateQueries(['conservations']),
       ])
-      // console.log(navigationRef?.current.getCurrentRoute())
+      if (navigationRef && Platform.OS === 'android') {
+        const route = navigationRef.current.getCurrentRoute()
+        if (
+          route.name !== 'Chat' ||
+          (route.name === 'Chat' && route.params['id'] !== data.conservationId)
+        ) {
+          PushNotification.localNotification({
+            channelId: 'chat-notification',
+            title: 'Safe Talk',
+            message: `${data.user.fullName} send a message to you`,
+            playSound: true,
+            soundName: 'default',
+          })
+        }
+      }
     } catch (err) {
       console.log(err)
     }

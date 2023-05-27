@@ -341,3 +341,14 @@ export async function updateConservationSetting(
     throw err
   }
 }
+
+export async function updateUserFcm(fcmToken: string) {
+  try {
+    const res = await axiosPrivate.put<ApiResponse>('/users/fcm', {
+      fcmToken,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
