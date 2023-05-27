@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "634387267488",
+    "project_id": "capstone-project-151be",
+    "storage_bucket": "capstone-project-151be.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:634387267488:android:8426f716fba2b810f12ec5",
+        "android_client_info": {
+          "package_name": "com.safetalk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "634387267488-bvi5de7uvnjecmhu8act7e9veoj9bpe5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhKLKShPZUsWUr8ZyFrRAFuS_5zyomWGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "634387267488-bvi5de7uvnjecmhu8act7e9veoj9bpe5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

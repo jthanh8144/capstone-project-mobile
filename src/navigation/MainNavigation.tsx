@@ -11,13 +11,16 @@ import { getUniqueIdSync } from 'react-native-device-info'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { PortalProvider } from '@gorhom/portal'
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
+import messaging from '@react-native-firebase/messaging'
+import PushNotification from 'react-native-push-notification'
+import PushNotificationIOS from '@react-native-community/push-notification-ios'
 
 import NonAuthenticatedStack from './NonAuthenticatedStack'
 import AuthenticatedStack from './AuthenticatedStack'
 import { AuthContext } from '../store/auth-context'
 import { AppContext } from '../store/app-context'
-import { getDeviceId } from '../services/http'
+import { getDeviceId, updateUserFcm } from '../services/http'
 import { StackParamList } from '../types'
 import { getFromLocalStorage } from '../utils'
 import { initializeDbConnection } from '../services/database'
@@ -32,14 +35,16 @@ function MainNavigation() {
 
   useEffect(() => {
     ;(async () => {
-      const [accessToken, refreshToken, storedDeviceId, userId] =
+      const [accessToken, refreshToken, storedDeviceId, userId, fcmToken] =
         await Promise.all([
           AsyncStorage.getItem('accessToken'),
           AsyncStorage.getItem('refreshToken'),
           AsyncStorage.getItem('deviceId'),
           AsyncStorage.getItem('userId'),
+          AsyncStorage.getItem('fcmToken'),
           initializeDbConnection(),
         ])
+      console.log(fcmToken)
       if (refreshToken && accessToken) {
         if (
           jwtDecode<{ exp: number; [key: string]: any }>(refreshToken).exp <
@@ -48,6 +53,13 @@ function MainNavigation() {
           await logout()
         } else {
           setIsAuthenticated(true)
+          if (!fcmToken && Platform.OS === 'android') {
+            const fcm = await messaging().getToken()
+            await Promise.all([
+              updateUserFcm(fcm),
+              AsyncStorage.setItem('fcmToken', fcm),
+            ])
+          }
         }
       }
       if (!storedDeviceId) {
@@ -57,6 +69,30 @@ function MainNavigation() {
       if (userId) {
         await getFromLocalStorage(userId, signalStore)
       }
+      PushNotification.configure({
+        onRegister: () => {},
+        onNotification: notification => {
+          if (Platform.OS === 'ios') {
+            notification.finish(PushNotificationIOS.FetchResult.NoData)
+          }
+        },
+        onAction: notification => {
+          console.log('ACTION:', notification.action)
+          console.log('NOTIFICATION:', notification)
+        },
+        onRegistrationError: err => {
+          console.error(err.message, err)
+        },
+        popInitialNotification: true,
+        requestPermissions: true,
+      })
+      PushNotification.createChannel(
+        {
+          channelId: 'chat-notification',
+          channelName: 'Chat notification channel',
+        },
+        () => {},
+      )
       SplashScreen.hide()
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
