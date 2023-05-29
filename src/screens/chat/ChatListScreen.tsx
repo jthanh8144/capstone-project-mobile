@@ -1,4 +1,9 @@
-import React, { useContext, useLayoutEffect, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useState,
+} from 'react'
 import { Platform, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import {
@@ -62,6 +67,28 @@ function ChatListScreen() {
     }
   }
 
+  const handleOnFriendRequest = useCallback(
+    async ({ type, status }: { type: string; status: string }) => {
+      try {
+        await Promise.all([
+          type === 'requested'
+            ? queryClient.invalidateQueries(['sendedFriendRequests'])
+            : undefined,
+          type === 'requested' && status === 'accepted'
+            ? queryClient.invalidateQueries(['friendsList'])
+            : undefined,
+          type === 'received'
+            ? queryClient.invalidateQueries(['receivedFriendRequests'])
+            : undefined,
+        ])
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
   const [profileQuery] = useQueries({
     queries: [
       {
@@ -76,6 +103,7 @@ function ChatListScreen() {
                 query: { roomId: res.user.id },
               })
               socket.on('message', handleOnNewMessage)
+              socket.on('friendRequest', handleOnFriendRequest)
             }
             return res
           } catch (err: any) {
