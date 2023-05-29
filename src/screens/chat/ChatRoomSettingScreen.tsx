@@ -12,6 +12,7 @@ import { AUDIO } from '../../constants/icons'
 import { updateConservationSetting } from '../../services/http'
 import { ChatRoomSettingStackProp } from '../../types'
 import { images } from '../../assets/images'
+import { LocalMessageRepository } from '../../services/database'
 
 export default function ChatRoomSettingScreen({
   route,
@@ -62,7 +63,11 @@ export default function ChatRoomSettingScreen({
 
   const handleDelete = async () => {
     const onSuccess = async () => {
-      await queryClient.invalidateQueries(['conservations'])
+      const localMessageRepository = new LocalMessageRepository()
+      await Promise.all([
+        queryClient.invalidateQueries(['conservations']),
+        localMessageRepository.deleteConservation(setting.conservationId),
+      ])
       navigation.popToTop()
     }
     await updateMutation.mutateAsync({ isRemoved: true, onSuccess })

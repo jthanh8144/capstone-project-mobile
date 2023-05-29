@@ -23,7 +23,10 @@ import { AppContext } from '../store/app-context'
 import { getDeviceId, updateUserFcm } from '../services/http'
 import { StackParamList } from '../types'
 import { getFromLocalStorage } from '../utils'
-import { initializeDbConnection } from '../services/database'
+import {
+  LocalMessageRepository,
+  initializeDbConnection,
+} from '../services/database'
 
 export const Stack = createNativeStackNavigator<StackParamList>()
 const navigationRef = createNavigationContainerRef()
@@ -44,7 +47,6 @@ function MainNavigation() {
           AsyncStorage.getItem('fcmToken'),
           initializeDbConnection(),
         ])
-      console.log(fcmToken)
       if (refreshToken && accessToken) {
         if (
           jwtDecode<{ exp: number; [key: string]: any }>(refreshToken).exp <
@@ -62,13 +64,27 @@ function MainNavigation() {
           }
         }
       }
-      if (!storedDeviceId) {
-        const { deviceId } = await getDeviceId(getUniqueIdSync())
-        await AsyncStorage.setItem('deviceId', deviceId.toString())
-      }
-      if (userId) {
-        await getFromLocalStorage(userId, signalStore)
-      }
+      await Promise.all([
+        (async () => {
+          if (!storedDeviceId) {
+            const { deviceId } = await getDeviceId(getUniqueIdSync())
+            await AsyncStorage.setItem('deviceId', deviceId.toString())
+          }
+        })(),
+        (async () => {
+          if (userId) {
+            await getFromLocalStorage(userId, signalStore)
+          }
+        })(),
+        (async () => {
+          try {
+            const localMessageRepository = new LocalMessageRepository()
+            await localMessageRepository.removeMessagesAfter30Days()
+          } catch (err) {
+            console.log(err)
+          }
+        })(),
+      ])
       PushNotification.configure({
         onRegister: () => {},
         onNotification: notification => {
