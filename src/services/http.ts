@@ -352,3 +352,14 @@ export async function updateUserFcm(fcmToken: string) {
     throw err
   }
 }
+
+export async function unfriend(userId: string) {
+  try {
+    const res = await axiosPrivate.delete<ApiResponse>(
+      `/users/unfriend/${userId}`,
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}

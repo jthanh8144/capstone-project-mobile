@@ -41,7 +41,7 @@ function ChatBox({
 
   const queryClient = useQueryClient()
 
-  const { mutate } = useMutation(
+  const { mutateAsync } = useMutation(
     async ({
       message,
       messageType,
@@ -104,7 +104,7 @@ function ChatBox({
     if (text.trim()) {
       const buffer = new TextEncoder().encode(text.trim()).buffer
       const cipherText = await sessionCipher.encrypt(buffer)
-      mutate({
+      await mutateAsync({
         message: Base64.btoa(cipherText.body),
         messageType: type,
         encryptType: cipherText.type,
@@ -128,7 +128,7 @@ function ChatBox({
       for (const url of urls) {
         const buffer = new TextEncoder().encode(url).buffer
         const cipherText = await sessionCipher.encrypt(buffer)
-        mutate({
+        await mutateAsync({
           message: Base64.btoa(cipherText.body),
           messageType: MessageTypeEnum.image,
           encryptType: cipherText.type,
