@@ -1,5 +1,5 @@
 import React, { MutableRefObject, useEffect, useMemo, useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { BackHandler, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Portal, PortalHost } from '@gorhom/portal'
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -68,6 +68,21 @@ export default function NewChat({
     refetch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedValue])
+
+  useEffect(() => {
+    const backAction = () => {
+      bottomSheetRef.current.close()
+      return true
+    }
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    )
+
+    return () => backHandler.remove()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const renderBackdrop = (props: BottomSheetBackdropProps) => (
     <BottomSheetBackdrop {...props} pressBehavior="collapse" opacity={1} />
