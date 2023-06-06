@@ -46,6 +46,7 @@ export type AuthenticatedStackParamList = {
     user: User
     setting: ConservationSetting
   }
+  WebView: { url: string; title?: string; openingOnBrowser?: boolean }
 }
 
 export type ProfileStackPropHook = NativeStackNavigationProp<
@@ -111,4 +112,9 @@ export type SearchUserStackProp = NativeStackScreenProps<
 export type ChatRoomSettingStackProp = NativeStackScreenProps<
   AuthenticatedStackParamList,
   'ChatRoomSetting'
+>
+
+export type WebViewStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'WebView'
 >

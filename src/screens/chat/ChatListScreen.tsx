@@ -110,9 +110,6 @@ function ChatListScreen() {
             throw new Error(err.message)
           }
         },
-        // onError: (error: any) => {
-        //   console.log(error)
-        // },
       },
     ],
   })
