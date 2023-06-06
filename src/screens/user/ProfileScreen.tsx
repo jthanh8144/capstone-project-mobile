@@ -12,6 +12,7 @@ import {
   KEY,
   LOCK,
   LOGOUT,
+  PAPER,
   PENCIL,
   QUESTION,
   WORLD,
@@ -27,6 +28,8 @@ import { AppContext } from '../../store/app-context'
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
 import { ProfileStackPropHook } from '../../types'
 import { removeUser } from '../../services/http'
+import { environments } from '../../configs/environment'
+import { joinURL } from '../../utils'
 
 function ProfileScreen() {
   const { logout } = useContext(AuthContext)
@@ -100,9 +103,37 @@ function ProfileScreen() {
             navigate('ChangePassword')
           }}
         />
-        <ProfileAction icon={LOCK} label="Privacy" />
         <ProfileAction icon={WORLD} label="App Language" />
-        <ProfileAction icon={QUESTION} label="Privacy" />
+        <ProfileAction
+          icon={LOCK}
+          label="Privacy policy"
+          onPress={() => {
+            navigate('WebView', {
+              url: joinURL(environments.apiUrl, 'privacy-policy.html'),
+              title: 'Privacy policy',
+            })
+          }}
+        />
+        <ProfileAction
+          icon={PAPER}
+          label="Terms & conditions"
+          onPress={() => {
+            navigate('WebView', {
+              url: joinURL(environments.apiUrl, 'terms-and-conditions.html'),
+              title: 'Terms & conditions',
+            })
+          }}
+        />
+        <ProfileAction
+          icon={QUESTION}
+          label="Help"
+          onPress={() => {
+            navigate('WebView', {
+              url: joinURL(environments.apiUrl, 'help.html'),
+              title: 'Help',
+            })
+          }}
+        />
       </View>
       <ProfileAction
         icon={LOGOUT}

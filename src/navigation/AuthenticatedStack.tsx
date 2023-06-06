@@ -11,6 +11,7 @@ import NewChatScreen from '../screens/chat/NewChatScreen'
 import SearchUserScreen from '../screens/search/SearchUserScreen'
 import ChatRoomSettingScreen from '../screens/chat/ChatRoomSettingScreen'
 import SearchConservationScreen from '../screens/search/SearchConservationScreen'
+import WebViewScreen from '../screens/common/WebViewScreen'
 
 const Stack = createNativeStackNavigator<AuthenticatedStackParamList>()
 
@@ -71,6 +72,11 @@ function AuthenticatedStack() {
           title: 'Conservation setting',
           headerShadowVisible: false,
         }}
+      />
+      <Stack.Screen
+        name="WebView"
+        component={WebViewScreen}
+        options={{ headerShown: true, title: 'Web View' }}
       />
     </Stack.Navigator>
   )
