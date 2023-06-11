@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { memo, useContext, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
@@ -10,15 +10,10 @@ import {
 import Spinner from 'react-native-loading-spinner-overlay'
 import FastImage from 'react-native-fast-image'
 
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
-dayjs.locale('vi')
-
 import { images } from '../../assets/images'
 import { Conservation } from '../../models/conservation'
 import { ChatStackPropHook, MessageTypeEnum } from '../../types'
-import { base64ToArrayBuffer } from '../../utils'
+import { base64ToArrayBuffer, showDate } from '../../utils'
 import { AppContext } from '../../store/app-context'
 import { LocalMessageRepository } from '../../services/database'
 import { Colors } from '../../constants/colors'
@@ -102,7 +97,7 @@ function ChatItem({
               {conservation.user.fullName}
             </Text>
             <Text style={styles.subTitle}>
-              {dayjs(conservation.latestMessage.createdAt).fromNow(true)}
+              {showDate(conservation.latestMessage.createdAt)}
             </Text>
           </View>
           <Text style={styles.subTitle} numberOfLines={2}>
@@ -120,7 +115,7 @@ function ChatItem({
   )
 }
 
-export default ChatItem
+export default memo(ChatItem)
 
 const styles = StyleSheet.create({
   container: {

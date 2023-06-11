@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react'
 import {
+  ActivityIndicator,
   FlatList,
   ImageBackground,
   KeyboardAvoidingView,
@@ -30,6 +31,7 @@ import { AppContext } from '../../store/app-context'
 import IconButton from '../../components/ui/IconButton'
 import { MORE } from '../../constants/icons'
 import { isDarkMode } from '../../utils'
+import { Colors } from '../../constants/colors'
 
 function ChatRoomScreen({ route, navigation }: ChatStackProp) {
   const conservationId = route.params.id
@@ -154,6 +156,9 @@ function ChatRoomScreen({ route, navigation }: ChatStackProp) {
             isDarkMode ? images.chatBackgroundDark : images.chatBackground
           }
           style={styles.background}>
+          {isFetchingNextPage && (
+            <ActivityIndicator size="large" color={Colors.primary} />
+          )}
           <FlatList
             ref={flatListRef}
             data={messages}

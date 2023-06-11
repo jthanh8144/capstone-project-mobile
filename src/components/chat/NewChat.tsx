@@ -1,4 +1,10 @@
-import React, { MutableRefObject, useEffect, useMemo, useState } from 'react'
+import React, {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { BackHandler, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Portal, PortalHost } from '@gorhom/portal'
 import BottomSheet, {
@@ -21,10 +27,18 @@ export default function NewChat({
 }) {
   const [value, setValue] = useState('')
   const [page, setPage] = useState(1)
+  const [isSheetOpened, setIsSheetOpened] = useState(false)
 
   const debouncedValue = useDebounce(value, 200)
 
   const snapPoints = useMemo(() => ['80%'], [])
+  const handleSheetChange = useCallback((index: number) => {
+    if (index !== -1) {
+      setIsSheetOpened(true)
+    } else {
+      setIsSheetOpened(false)
+    }
+  }, [])
 
   const {
     isLoading,
@@ -69,20 +83,23 @@ export default function NewChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedValue])
 
-  useEffect(() => {
-    const backAction = () => {
-      bottomSheetRef.current.close()
-      return true
-    }
+  const backAction = useCallback(() => {
+    bottomSheetRef.current.close()
+    return true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
+  useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
     )
-
+    if (!isSheetOpened) {
+      backHandler.remove()
+    }
     return () => backHandler.remove()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isSheetOpened])
 
   const renderBackdrop = (props: BottomSheetBackdropProps) => (
     <BottomSheetBackdrop {...props} pressBehavior="collapse" opacity={1} />
@@ -97,6 +114,7 @@ export default function NewChat({
           index={-1}
           snapPoints={snapPoints}
           enablePanDownToClose={true}
+          onChange={handleSheetChange}
           backdropComponent={renderBackdrop}
           style={styles.sheetContainer}
           handleStyle={styles.topBar}
