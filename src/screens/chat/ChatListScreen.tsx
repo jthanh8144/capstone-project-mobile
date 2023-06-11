@@ -99,7 +99,7 @@ function ChatListScreen() {
             if (res && res.user) {
               setUser(res.user)
 
-              const socket = io(environments.apiUrl, {
+              const socket = io(environments.socketUrl, {
                 query: { roomId: res.user.id },
               })
               socket.on('message', handleOnNewMessage)

@@ -69,7 +69,7 @@ function NewChatBox({ user }: { user: User }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const { invalidateQueries } = useQueryClient()
+  const queryClient = useQueryClient()
 
   const { mutateAsync } = useMutation(
     async ({
@@ -120,7 +120,7 @@ function NewChatBox({ user }: { user: User }) {
           user,
           setting,
         })
-        await invalidateQueries(['conservations'])
+        await queryClient.invalidateQueries(['conservations'])
       },
     },
   )
