@@ -363,3 +363,27 @@ export async function unfriend(userId: string) {
     throw err
   }
 }
+
+export async function requestResetPassword(email: string) {
+  try {
+    const res = await axiosPublic.post<ApiResponse>(
+      '/auth/request-reset-password',
+      { email },
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function resetPassword(email: string, code: string) {
+  try {
+    const res = await axiosPublic.post<ApiResponse>('/auth/reset-password', {
+      email,
+      code,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}

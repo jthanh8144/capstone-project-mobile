@@ -96,6 +96,7 @@ export default function SearchUserScreen({}: SearchUserStackProp) {
         lightTheme={!isDarkMode}
         showLoading={isLoading}
         style={styles.searchBar}
+        autoFocus={true}
       />
       <SearchUserList users={users} onLoadMore={handleLoadMore} />
     </SafeAreaView>
