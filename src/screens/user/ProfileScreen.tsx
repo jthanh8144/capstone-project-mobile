@@ -45,8 +45,14 @@ function ProfileScreen() {
     try {
       const { success, message } = await removeUser(password)
       if (success) {
-        await logout()
+        await logout(true)
         setRemoveConfirm(false)
+        DialogNotification.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: 'Success',
+          textBody: 'Removed user success!',
+          button: 'close',
+        })
       } else {
         DialogNotification.show({
           type: ALERT_TYPE.DANGER,

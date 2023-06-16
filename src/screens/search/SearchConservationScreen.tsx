@@ -73,6 +73,7 @@ export default function SearchConservationScreen({}: SearchConservationStackProp
         lightTheme={!isDarkMode}
         showLoading={isLoading}
         style={styles.searchBar}
+        autoFocus={true}
       />
       <View style={styles.wrapper}>
         <FriendList friends={friends} />
