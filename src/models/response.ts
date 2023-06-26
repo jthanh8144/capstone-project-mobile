@@ -91,3 +91,8 @@ export type SearchUserResponse = {
   nextPage: number | undefined
   totalPage: number
 }
+
+export type CreateCallResponse = {
+  roomId: string
+  [key: string]: any
+}

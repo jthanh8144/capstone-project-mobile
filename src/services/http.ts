@@ -1,6 +1,7 @@
 import {
   ConservationSettingResponse,
   ConservationWithUser,
+  CreateCallResponse,
   NewConservationResponse,
   SearchUserResponse,
   SendMessageResponse,
@@ -18,7 +19,8 @@ import {
   PresignedUrlResponse,
   ProfileResponse,
 } from '../models/response'
-import { MessageTypeEnum } from '../types'
+import { CallType, MessageTypeEnum } from '../types'
+import { environments } from '../configs/environment'
 
 export async function login(email: string, password: string) {
   try {
@@ -34,7 +36,7 @@ export async function login(email: string, password: string) {
 
 export async function logoutUser(refreshToken: string) {
   try {
-    const res = await axiosPrivate.post<ApiResponse>('/auth/logout', {
+    const res = await axiosPublic.post<ApiResponse>('/auth/logout', {
       refreshToken,
     })
     return res.data
@@ -382,6 +384,60 @@ export async function resetPassword(email: string, code: string) {
       email,
       code,
     })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function createCall(
+  receiverId: string,
+  meetingId: string,
+  callerName: string,
+) {
+  try {
+    const res = await axiosPrivate.post<ApiResponse>('/call', {
+      receiverId,
+      meetingId,
+      callerName,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function updateCall(
+  userId: string,
+  type: CallType,
+  meetingId?: string,
+  callerName?: string,
+) {
+  try {
+    const res = await axiosPrivate.put<ApiResponse>('/call', {
+      userId,
+      type,
+      meetingId,
+      callerName,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function createCallRoom() {
+  try {
+    const res = await axios.post<CreateCallResponse>(
+      `${environments.videoSDKApi}/rooms`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: environments.videoSDKToken,
+        },
+      },
+    )
     return res.data
   } catch (err) {
     throw err

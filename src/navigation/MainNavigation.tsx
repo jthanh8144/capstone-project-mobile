@@ -3,7 +3,6 @@ import {
   NavigationContainer,
   createNavigationContainerRef,
 } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import jwtDecode from 'jwt-decode'
 import SplashScreen from 'react-native-splash-screen'
@@ -21,14 +20,14 @@ import AuthenticatedStack from './AuthenticatedStack'
 import { AuthContext } from '../store/auth-context'
 import { AppContext } from '../store/app-context'
 import { getDeviceId, updateUserFcm } from '../services/http'
-import { StackParamList } from '../types'
+import { JwtDecodeData } from '../types'
 import { getFromLocalStorage } from '../utils'
 import {
   LocalMessageRepository,
   initializeDbConnection,
 } from '../services/database'
+import { initializeCallHandle, initializeCallKeep } from '../services/call'
 
-export const Stack = createNativeStackNavigator<StackParamList>()
 const navigationRef = createNavigationContainerRef()
 
 function MainNavigation() {
@@ -38,6 +37,7 @@ function MainNavigation() {
 
   useEffect(() => {
     ;(async () => {
+      await initializeCallKeep()
       const [accessToken, refreshToken, storedDeviceId, userId, fcmToken] =
         await Promise.all([
           AsyncStorage.getItem('accessToken'),
@@ -48,11 +48,8 @@ function MainNavigation() {
           initializeDbConnection(),
         ])
       if (refreshToken && accessToken) {
-        if (
-          jwtDecode<{ exp: number; [key: string]: any }>(refreshToken).exp <
-          Date.now() / 1000
-        ) {
-          await logout()
+        if (jwtDecode<JwtDecodeData>(refreshToken).exp < Date.now() / 1000) {
+          await logout(true)
         } else {
           setIsAuthenticated(true)
           if (!fcmToken && Platform.OS === 'android') {
@@ -62,6 +59,7 @@ function MainNavigation() {
               AsyncStorage.setItem('fcmToken', fcm),
             ])
           }
+          initializeCallHandle()
         }
       }
       await Promise.all([
@@ -116,18 +114,19 @@ function MainNavigation() {
 
   return (
     <PortalProvider>
-      <NavigationContainer ref={navigationRef}>
-        <GestureHandlerRootView
-          style={StyleSheet.create({ container: { flex: 1 } }).container}>
-          <BottomSheetModalProvider>
+      <GestureHandlerRootView
+        style={StyleSheet.create({ container: { flex: 1 } }).container}>
+        <BottomSheetModalProvider>
+          <NavigationContainer ref={navigationRef}>
             {isAuthenticated ? (
               <AuthenticatedStack />
             ) : (
               <NonAuthenticatedStack />
             )}
-          </BottomSheetModalProvider>
-        </GestureHandlerRootView>
-      </NavigationContainer>
+          </NavigationContainer>
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
+      {/* </NavigationContainer> */}
     </PortalProvider>
   )
 }

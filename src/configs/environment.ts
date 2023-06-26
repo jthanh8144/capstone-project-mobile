@@ -14,4 +14,6 @@ export const environments = {
         ? 'http://10.0.2.2:4000/'
         : 'http://localhost:4000/'
       : Config.SOCKET_URL,
+  videoSDKApi: 'https://api.videosdk.live/v2',
+  videoSDKToken: Config.VIDEO_SDK_TOKEN,
 }

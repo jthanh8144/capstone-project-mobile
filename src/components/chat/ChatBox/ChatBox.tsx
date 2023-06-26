@@ -113,7 +113,6 @@ function ChatBox({
     if (files.length) {
       const urls = await Promise.all(
         files.map(async file => {
-          console.log(file.mime)
           const { url, presignedUrl } = await getPresignedUrl(
             file.mime?.split('/')[1] || 'png',
             'message_file',

@@ -74,6 +74,7 @@ function FriendListScreen() {
               />
             }
             onLoadMore={handleLoadMore}
+            haveCall={true}
           />
         ) : (
           <View style={styles.emptyTextWrapper}>
