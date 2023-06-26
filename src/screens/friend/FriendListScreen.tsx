@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react'
-import { RefreshControl, StyleSheet, View } from 'react-native'
+import { RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useNavigation } from '@react-navigation/native'
 import Spinner from 'react-native-loading-spinner-overlay'
@@ -64,16 +64,25 @@ function FriendListScreen() {
     <>
       <Spinner visible={isLoading} />
       <View style={styles.container}>
-        <FriendList
-          friends={friends}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetchingByUser}
-              onRefresh={refetchByUser}
-            />
-          }
-          onLoadMore={handleLoadMore}
-        />
+        {friends.length ? (
+          <FriendList
+            friends={friends}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetchingByUser}
+                onRefresh={refetchByUser}
+              />
+            }
+            onLoadMore={handleLoadMore}
+            haveCall={true}
+          />
+        ) : (
+          <View style={styles.emptyTextWrapper}>
+            <Text style={styles.emptyText}>
+              You don&apos;t have any friends
+            </Text>
+          </View>
+        )}
       </View>
     </>
   )
@@ -85,5 +94,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  emptyTextWrapper: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '500',
+    paddingBottom: 100,
   },
 })

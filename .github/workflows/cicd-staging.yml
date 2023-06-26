@@ -40,6 +40,8 @@ jobs:
         run: |
           cp example.env .env
           echo API_URL=${{ secrets.API_URL_STAGING }} >> .env
+          echo SOCKET_URL=${{ secrets.SOCKET_URL_STAGING }} >> .env
+          echo VIDEO_SDK_TOKEN=${{ secrets.VIDEO_SDK_TOKEN }} >> .env
 
       - name: Make Gradlew Executable
         run: cd android && chmod +x ./gradlew

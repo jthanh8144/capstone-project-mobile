@@ -4,10 +4,12 @@ import React from 'react'
 import { StatusBar } from 'react-native'
 import { AlertNotificationRoot } from 'react-native-alert-notification'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import ErrorBoundary from 'react-native-error-boundary'
 
 import AppProvider from './store/app-context'
 import AuthProvider from './store/auth-context'
 import MainNavigation from './navigation/MainNavigation'
+import { isDarkMode } from './utils'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,8 +22,8 @@ const queryClient = new QueryClient({
 
 function App(): JSX.Element {
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
+    <ErrorBoundary>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <AlertNotificationRoot>
         <AuthProvider>
           <AppProvider>
@@ -31,7 +33,7 @@ function App(): JSX.Element {
           </AppProvider>
         </AuthProvider>
       </AlertNotificationRoot>
-    </>
+    </ErrorBoundary>
   )
 }
 

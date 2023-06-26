@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm'
+import { LessThanOrEqual, Repository } from 'typeorm'
 import dataSource from './config'
 import { LocalMessage } from './local-message.entity'
 
@@ -27,5 +27,16 @@ export class LocalMessageRepository extends Repository<LocalMessage> {
     plainText: string,
   ) {
     await this.save(this.create({ conservationId, messageId, plainText }))
+  }
+
+  public async removeMessagesAfter30Days() {
+    const time = new Date()
+    time.setDate(time.getDate() - 30)
+    const messages = await this.find({
+      where: { createdAt: LessThanOrEqual(time) },
+    })
+    if (messages.length) {
+      await this.remove(messages)
+    }
   }
 }

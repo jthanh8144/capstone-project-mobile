@@ -1,18 +1,20 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { SafeAreaView, Platform, StyleSheet } from 'react-native'
+import { SafeAreaView, StyleSheet } from 'react-native'
 import { SearchBar } from '@rneui/themed'
 
 import Icon from '../../components/ui/Icon'
 import IconButton from '../../components/ui/IconButton'
 import SearchUserList from '../../components/search/SearchUserList'
-import { LEFT, SEARCH, X_MARK_THIN, X_MARK_IOS } from '../../constants/icons'
+import { SEARCH, X_MARK_IOS } from '../../constants/icons'
 import { SearchUserStackProp } from '../../types'
 import { useDebounce } from '../../hooks'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { searchUser } from '../../services/http'
 import { SearchUserResponse } from '../../models/response'
+import { isDarkMode } from '../../utils'
+import { Colors } from '../../constants/colors'
 
-export default function SearchUserScreen({ navigation }: SearchUserStackProp) {
+export default function SearchUserScreen({}: SearchUserStackProp) {
   const ref = useRef(null)
   const [value, setValue] = useState('')
   const [page, setPage] = useState(1)
@@ -72,43 +74,30 @@ export default function SearchUserScreen({ navigation }: SearchUserStackProp) {
   const onClear = () => {
     setValue('')
   }
-  const onBack = () => {
-    navigation.goBack()
-  }
 
   return (
     <SafeAreaView style={styles.container}>
-      {Platform.OS === 'ios' ? (
-        <SearchBar
-          ref={ref}
-          platform="ios"
-          clearIcon={
-            <IconButton svgText={X_MARK_IOS} size={20} onPress={onClear} />
-          }
-          searchIcon={<Icon svgText={SEARCH} size={20} />}
-          placeholder="Type query here..."
-          placeholderTextColor="#888"
-          value={value}
-          onChangeText={onChangeText}
-          onCancel={onBack}
-          showLoading={isLoading}
-        />
-      ) : (
-        <SearchBar
-          ref={ref}
-          platform="android"
-          clearIcon={
-            <IconButton svgText={X_MARK_THIN} size={24} onPress={onClear} />
-          }
-          cancelIcon={<IconButton svgText={LEFT} size={24} onPress={onBack} />}
-          searchIcon={<Icon svgText={SEARCH} size={20} />}
-          placeholder="Type query here..."
-          placeholderTextColor="#888"
-          value={value}
-          onChangeText={onChangeText}
-          showLoading={isLoading}
-        />
-      )}
+      <SearchBar
+        ref={ref}
+        platform="default"
+        clearIcon={
+          <IconButton
+            svgText={X_MARK_IOS}
+            size={20}
+            onPress={onClear}
+            color={Colors.textDark}
+          />
+        }
+        searchIcon={<Icon svgText={SEARCH} size={20} color={Colors.textDark} />}
+        placeholder="Type query here..."
+        placeholderTextColor="#888"
+        value={value}
+        onChangeText={onChangeText}
+        lightTheme={!isDarkMode}
+        showLoading={isLoading}
+        style={styles.searchBar}
+        autoFocus={true}
+      />
       <SearchUserList users={users} onLoadMore={handleLoadMore} />
     </SafeAreaView>
   )
@@ -117,5 +106,9 @@ export default function SearchUserScreen({ navigation }: SearchUserStackProp) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.backgroundDark,
+  },
+  searchBar: {
+    color: Colors.textDark,
   },
 })

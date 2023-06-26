@@ -50,7 +50,7 @@ function LoginScreen({ navigation }: LoginStackProp) {
     })
   }
 
-  const { mutate, isLoading } = useMutation(onSubmit)
+  const { mutateAsync, isLoading } = useMutation(onSubmit)
 
   return (
     <>
@@ -58,8 +58,8 @@ function LoginScreen({ navigation }: LoginStackProp) {
       <AuthContent
         title={'Login'}
         isLogin={true}
-        onSubmit={data => {
-          mutate(data)
+        onSubmit={async data => {
+          await mutateAsync(data)
         }}
         onError={onError}
         question="Don't have an account?"

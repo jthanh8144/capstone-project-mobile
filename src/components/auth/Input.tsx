@@ -41,10 +41,16 @@ function Input({
         <View style={styles.container}>
           <Text style={styles.label}>{label}</Text>
           <View style={styles.inputContainer}>
-            <Icon svgText={icon} size={20} style={styles.icon} />
+            <Icon
+              svgText={icon}
+              size={20}
+              style={styles.icon}
+              color={Colors.textDark}
+            />
             <TextInput
               autoCapitalize="none"
               placeholder={placeholder}
+              placeholderTextColor={Colors.gray}
               value={value}
               onChangeText={onChange}
               style={styles.input}
@@ -87,5 +93,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 8,
     fontSize: 16,
+    color: Colors.textDark,
   },
 })

@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   actionText: {
     flex: 1,
     fontSize: 16,
+    color: Colors.textDark,
   },
   actionArrow: {
     padding: 8,

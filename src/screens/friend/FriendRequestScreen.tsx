@@ -107,7 +107,11 @@ function FriendRequestScreen() {
             navigate('SearchUser')
           }}
         />
-        <View style={styles.wrapper}>
+        <View
+          style={[
+            styles.wrapper,
+            !receivedList.length && !sendedList.length ? styles.flexOne : {},
+          ]}>
           {!receivedList.length && !sendedList.length ? (
             <View style={styles.emptyTextWrapper}>
               <Text style={styles.emptyText}>
@@ -148,13 +152,15 @@ function FriendRequestScreen() {
 export default FriendRequestScreen
 
 const styles = StyleSheet.create({
+  flexOne: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
   },
   wrapper: {
     paddingHorizontal: 16,
-    flex: 1,
   },
   emptyTextWrapper: {
     flex: 1,

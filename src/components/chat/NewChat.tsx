@@ -1,5 +1,11 @@
-import React, { MutableRefObject, useEffect, useMemo, useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import React, {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { BackHandler, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Portal, PortalHost } from '@gorhom/portal'
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -12,6 +18,7 @@ import { FriendsListResponse } from '../../models/response'
 import { getFriendsList } from '../../services/http'
 import FriendList from '../friend/FriendList'
 import { useDebounce } from '../../hooks'
+import { Colors } from '../../constants/colors'
 
 export default function NewChat({
   bottomSheetRef,
@@ -20,10 +27,18 @@ export default function NewChat({
 }) {
   const [value, setValue] = useState('')
   const [page, setPage] = useState(1)
+  const [isSheetOpened, setIsSheetOpened] = useState(false)
 
   const debouncedValue = useDebounce(value, 200)
 
   const snapPoints = useMemo(() => ['80%'], [])
+  const handleSheetChange = useCallback((index: number) => {
+    if (index !== -1) {
+      setIsSheetOpened(true)
+    } else {
+      setIsSheetOpened(false)
+    }
+  }, [])
 
   const {
     isLoading,
@@ -68,6 +83,24 @@ export default function NewChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedValue])
 
+  const backAction = useCallback(() => {
+    bottomSheetRef.current.close()
+    return true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    )
+    if (!isSheetOpened) {
+      backHandler.remove()
+    }
+    return () => backHandler.remove()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSheetOpened])
+
   const renderBackdrop = (props: BottomSheetBackdropProps) => (
     <BottomSheetBackdrop {...props} pressBehavior="collapse" opacity={1} />
   )
@@ -81,8 +114,11 @@ export default function NewChat({
           index={-1}
           snapPoints={snapPoints}
           enablePanDownToClose={true}
+          onChange={handleSheetChange}
           backdropComponent={renderBackdrop}
-          style={styles.sheetContainer}>
+          style={styles.sheetContainer}
+          handleStyle={styles.topBar}
+          handleIndicatorStyle={styles.topBarIndicator}>
           <View style={styles.contentContainer}>
             <Text style={styles.bottomSheetTitle}>Add new message</Text>
             <View style={styles.inputWrapper}>
@@ -90,6 +126,7 @@ export default function NewChat({
               <TextInput
                 autoCapitalize="none"
                 placeholder="Enter name..."
+                placeholderTextColor={Colors.gray}
                 value={value}
                 onChangeText={text => setValue(text)}
                 style={styles.input}
@@ -126,25 +163,38 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 20,
+    backgroundColor: Colors.background,
   },
   bottomSheetTitle: {
     fontSize: 20,
     fontWeight: '500',
     textAlign: 'center',
+    color: Colors.gray,
+  },
+  topBar: {
+    backgroundColor: Colors.background,
+    borderColor: 'transparent',
+  },
+  topBarIndicator: {
+    backgroundColor: Colors.textDark,
+    borderColor: 'transparent',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 6,
     marginBottom: 10,
+    backgroundColor: Colors.background,
   },
   inputLabel: {
     fontSize: 16,
     marginRight: 6,
+    color: Colors.textDark,
   },
   input: {
     fontSize: 16,
     flex: 1,
     padding: 2,
+    color: Colors.textDark,
   },
 })
