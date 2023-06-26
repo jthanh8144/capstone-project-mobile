@@ -11,12 +11,21 @@ import NewChatScreen from '../screens/chat/NewChatScreen'
 import SearchUserScreen from '../screens/search/SearchUserScreen'
 import ChatRoomSettingScreen from '../screens/chat/ChatRoomSettingScreen'
 import SearchConservationScreen from '../screens/search/SearchConservationScreen'
+import WebViewScreen from '../screens/common/WebViewScreen'
+import CallingScreen from '../screens/call/CallingScreen'
+import CallRoomScreen from '../screens/call/CallRoomScreen'
 
 const Stack = createNativeStackNavigator<AuthenticatedStackParamList>()
 
 function AuthenticatedStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        headerTitleStyle: { color: Colors.textDark },
+        headerTintColor: Colors.textDark,
+        headerStyle: { backgroundColor: Colors.background },
+      }}>
       <Stack.Screen name="Home" component={BottomTabNavigation} />
       <Stack.Screen
         name="EditProfile"
@@ -25,7 +34,6 @@ function AuthenticatedStack() {
           presentation: 'modal',
           headerShown: true,
           title: 'Edit Profile',
-          headerStyle: { backgroundColor: Colors.background },
           headerShadowVisible: false,
         }}
       />
@@ -36,7 +44,6 @@ function AuthenticatedStack() {
           presentation: 'modal',
           headerShown: true,
           title: 'Update Password',
-          headerStyle: { backgroundColor: Colors.background },
           headerShadowVisible: false,
         }}
       />
@@ -65,10 +72,16 @@ function AuthenticatedStack() {
         options={{
           headerShown: true,
           title: 'Conservation setting',
-          headerStyle: { backgroundColor: Colors.background },
           headerShadowVisible: false,
         }}
       />
+      <Stack.Screen
+        name="WebView"
+        component={WebViewScreen}
+        options={{ headerShown: true, title: 'Web View' }}
+      />
+      <Stack.Screen name="Calling" component={CallingScreen} />
+      <Stack.Screen name="CallRoom" component={CallRoomScreen} />
     </Stack.Navigator>
   )
 }

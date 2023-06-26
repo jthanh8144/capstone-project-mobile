@@ -35,7 +35,10 @@ export type FontWeightValue =
   | '900'
   | undefined
 
+export type JwtDecodeData = { exp: number; [key: string]: any }
+
 export * from './navigation'
 export * from './form'
 export * from './enum'
 export * from './socket'
+export * from './call'

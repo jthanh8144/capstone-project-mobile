@@ -1,6 +1,7 @@
 import {
   ConservationSettingResponse,
   ConservationWithUser,
+  CreateCallResponse,
   NewConservationResponse,
   SearchUserResponse,
   SendMessageResponse,
@@ -18,7 +19,8 @@ import {
   PresignedUrlResponse,
   ProfileResponse,
 } from '../models/response'
-import { MessageTypeEnum } from '../types'
+import { CallType, MessageTypeEnum } from '../types'
+import { environments } from '../configs/environment'
 
 export async function login(email: string, password: string) {
   try {
@@ -34,7 +36,7 @@ export async function login(email: string, password: string) {
 
 export async function logoutUser(refreshToken: string) {
   try {
-    const res = await axiosPrivate.post<ApiResponse>('/auth/logout', {
+    const res = await axiosPublic.post<ApiResponse>('/auth/logout', {
       refreshToken,
     })
     return res.data
@@ -335,6 +337,106 @@ export async function updateConservationSetting(
     const res = await axiosPrivate.put<ApiResponse>(
       `/conservations/settings/${id}`,
       data,
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function updateUserFcm(fcmToken: string) {
+  try {
+    const res = await axiosPrivate.put<ApiResponse>('/users/fcm', {
+      fcmToken,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function unfriend(userId: string) {
+  try {
+    const res = await axiosPrivate.delete<ApiResponse>(
+      `/users/unfriend/${userId}`,
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function requestResetPassword(email: string) {
+  try {
+    const res = await axiosPublic.post<ApiResponse>(
+      '/auth/request-reset-password',
+      { email },
+    )
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function resetPassword(email: string, code: string) {
+  try {
+    const res = await axiosPublic.post<ApiResponse>('/auth/reset-password', {
+      email,
+      code,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function createCall(
+  receiverId: string,
+  meetingId: string,
+  callerName: string,
+) {
+  try {
+    const res = await axiosPrivate.post<ApiResponse>('/call', {
+      receiverId,
+      meetingId,
+      callerName,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function updateCall(
+  userId: string,
+  type: CallType,
+  meetingId?: string,
+  callerName?: string,
+) {
+  try {
+    const res = await axiosPrivate.put<ApiResponse>('/call', {
+      userId,
+      type,
+      meetingId,
+      callerName,
+    })
+    return res.data
+  } catch (err) {
+    throw err
+  }
+}
+
+export async function createCallRoom() {
+  try {
+    const res = await axios.post<CreateCallResponse>(
+      `${environments.videoSDKApi}/rooms`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: environments.videoSDKToken,
+        },
+      },
     )
     return res.data
   } catch (err) {

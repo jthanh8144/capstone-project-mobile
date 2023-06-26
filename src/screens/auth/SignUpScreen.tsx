@@ -46,7 +46,7 @@ function SignUpScreen({ navigation }: SignUpStackProp) {
     })
   }
 
-  const { mutate, isLoading } = useMutation(onSubmit)
+  const { mutateAsync, isLoading } = useMutation(onSubmit)
 
   return (
     <>
@@ -54,8 +54,8 @@ function SignUpScreen({ navigation }: SignUpStackProp) {
       <AuthContent
         title={'Sign Up'}
         isLogin={false}
-        onSubmit={data => {
-          mutate(data)
+        onSubmit={async data => {
+          mutateAsync(data)
         }}
         onError={onError}
         question="Already have an account."

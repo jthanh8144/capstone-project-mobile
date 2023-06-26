@@ -46,6 +46,10 @@ export type AuthenticatedStackParamList = {
     user: User
     setting: ConservationSetting
   }
+  WebView: { url: string; title?: string; openingOnBrowser?: boolean }
+
+  Calling: { id: string; name: string }
+  CallRoom: { meetingId: string }
 }
 
 export type ProfileStackPropHook = NativeStackNavigationProp<
@@ -111,4 +115,19 @@ export type SearchUserStackProp = NativeStackScreenProps<
 export type ChatRoomSettingStackProp = NativeStackScreenProps<
   AuthenticatedStackParamList,
   'ChatRoomSetting'
+>
+
+export type WebViewStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'WebView'
+>
+
+export type CallingStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'Calling'
+>
+
+export type CallRoomStackProp = NativeStackScreenProps<
+  AuthenticatedStackParamList,
+  'CallRoom'
 >

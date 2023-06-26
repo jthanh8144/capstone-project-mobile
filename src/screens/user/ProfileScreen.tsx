@@ -1,23 +1,18 @@
 import React, { useContext, useState } from 'react'
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  Platform,
-} from 'react-native'
+import { Pressable, StyleSheet, Text, View, Platform } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import Dialog from 'react-native-dialog'
 import {
   ALERT_TYPE,
   Dialog as DialogNotification,
 } from 'react-native-alert-notification'
+import FastImage from 'react-native-fast-image'
 
 import {
   KEY,
   LOCK,
   LOGOUT,
+  PAPER,
   PENCIL,
   QUESTION,
   WORLD,
@@ -33,6 +28,8 @@ import { AppContext } from '../../store/app-context'
 import ErrorOverlay from '../../components/ui/ErrorOverlay'
 import { ProfileStackPropHook } from '../../types'
 import { removeUser } from '../../services/http'
+import { environments } from '../../configs/environment'
+import { joinURL } from '../../utils'
 
 function ProfileScreen() {
   const { logout } = useContext(AuthContext)
@@ -48,8 +45,14 @@ function ProfileScreen() {
     try {
       const { success, message } = await removeUser(password)
       if (success) {
-        await logout()
+        await logout(true)
         setRemoveConfirm(false)
+        DialogNotification.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: 'Success',
+          textBody: 'Removed user success!',
+          button: 'close',
+        })
       } else {
         DialogNotification.show({
           type: ALERT_TYPE.DANGER,
@@ -77,7 +80,7 @@ function ProfileScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.wrapper}>
-        <Image
+        <FastImage
           source={
             user?.avatarUrl ? { uri: user.avatarUrl } : images.avatarPlaceholder
           }
@@ -106,9 +109,37 @@ function ProfileScreen() {
             navigate('ChangePassword')
           }}
         />
-        <ProfileAction icon={LOCK} label="Privacy" />
         <ProfileAction icon={WORLD} label="App Language" />
-        <ProfileAction icon={QUESTION} label="Privacy" />
+        <ProfileAction
+          icon={LOCK}
+          label="Privacy policy"
+          onPress={() => {
+            navigate('WebView', {
+              url: joinURL(environments.apiUrl, 'privacy-policy.html'),
+              title: 'Privacy policy',
+            })
+          }}
+        />
+        <ProfileAction
+          icon={PAPER}
+          label="Terms & conditions"
+          onPress={() => {
+            navigate('WebView', {
+              url: joinURL(environments.apiUrl, 'terms-and-conditions.html'),
+              title: 'Terms & conditions',
+            })
+          }}
+        />
+        <ProfileAction
+          icon={QUESTION}
+          label="Help"
+          onPress={() => {
+            navigate('WebView', {
+              url: joinURL(environments.apiUrl, 'help.html'),
+              title: 'Help',
+            })
+          }}
+        />
       </View>
       <ProfileAction
         icon={LOGOUT}

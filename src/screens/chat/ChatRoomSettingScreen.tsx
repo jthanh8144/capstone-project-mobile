@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import FastImage from 'react-native-fast-image'
+import Spinner from 'react-native-loading-spinner-overlay'
 
 import HorizontalItem from '../../components/chat/ChatSetting/HorizontalItem'
 import VerticalItem from '../../components/chat/ChatSetting/VerticalItem'
@@ -8,9 +10,10 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import { ARCHIVE, MUTED, PERSON_MINUS, TRASH } from '../../constants/icons'
 import { Colors } from '../../constants/colors'
 import { AUDIO } from '../../constants/icons'
-import { updateConservationSetting } from '../../services/http'
+import { unfriend, updateConservationSetting } from '../../services/http'
 import { ChatRoomSettingStackProp } from '../../types'
 import { images } from '../../assets/images'
+import { LocalMessageRepository } from '../../services/database'
 
 export default function ChatRoomSettingScreen({
   route,
@@ -26,6 +29,8 @@ export default function ChatRoomSettingScreen({
   const [modalTitle, setModalTitle] = useState('')
   const [modalMessage, setModalMessage] = useState('')
   const [modalAction, setModalAction] = useState('')
+
+  const [isShownUnfriend, setIsShownUnfriend] = useState(true)
 
   const queryClient = useQueryClient()
 
@@ -50,6 +55,21 @@ export default function ChatRoomSettingScreen({
       },
     },
   )
+  const unfriendMutation = useMutation(
+    async () => {
+      try {
+        await unfriend(user.id)
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    {
+      onSuccess: async () => {
+        setIsShownUnfriend(false)
+        await queryClient.invalidateQueries(['friendsList'])
+      },
+    },
+  )
 
   const handleArchive = async () => {
     const onSuccess = async () => {
@@ -61,7 +81,11 @@ export default function ChatRoomSettingScreen({
 
   const handleDelete = async () => {
     const onSuccess = async () => {
-      await queryClient.invalidateQueries(['conservations'])
+      const localMessageRepository = new LocalMessageRepository()
+      await Promise.all([
+        queryClient.invalidateQueries(['conservations']),
+        localMessageRepository.deleteConservation(setting.conservationId),
+      ])
       navigation.popToTop()
     }
     await updateMutation.mutateAsync({ isRemoved: true, onSuccess })
@@ -88,9 +112,12 @@ export default function ChatRoomSettingScreen({
         }}
         onConfirm={onConfirm}
       />
+      <Spinner
+        visible={updateMutation.isLoading || unfriendMutation.isLoading}
+      />
       <View style={styles.container}>
         <View style={styles.topWrapper}>
-          <Image
+          <FastImage
             source={
               user.avatarUrl
                 ? { uri: user.avatarUrl }
@@ -102,13 +129,17 @@ export default function ChatRoomSettingScreen({
           <Text style={styles.email}>{user.email}</Text>
         </View>
         <View style={styles.buttonsWrapper}>
-          <HorizontalItem
-            backgroundColor={Colors.red}
-            color={Colors.white}
-            onPress={() => {}}
-            svgText={PERSON_MINUS}
-            text="Unfriend"
-          />
+          {isShownUnfriend && (
+            <HorizontalItem
+              backgroundColor={Colors.red}
+              color={Colors.white}
+              onPress={async () => {
+                await unfriendMutation.mutateAsync()
+              }}
+              svgText={PERSON_MINUS}
+              text="Unfriend"
+            />
+          )}
           <HorizontalItem
             backgroundColor={Colors.primary}
             color={Colors.white}

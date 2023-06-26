@@ -1,11 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, memo } from 'react'
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native'
 import { SessionCipher } from '@privacyresearch/libsignal-protocol-typescript'
 import { TextDecoder } from 'text-encoding'
-
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
 
 import { Message as MessageModel } from '../../models/message'
 import { Colors } from '../../constants/colors'
@@ -13,6 +9,7 @@ import { AppContext } from '../../store/app-context'
 import { MessageTypeEnum } from '../../types'
 import ImageAttachment from './ImageAttachment'
 import Base64 from '../../utils/base64'
+import { showDate } from '../../utils'
 import { LocalMessage, LocalMessageRepository } from '../../services/database'
 
 function Message({
@@ -87,18 +84,22 @@ function Message({
         styles.container,
         isMyMessage() ? styles.myMessage : styles.notMyMessage,
       ]}>
-      {message.messageType === MessageTypeEnum.text && <Text>{plainText}</Text>}
+      {message.messageType === MessageTypeEnum.text && (
+        <Text style={isMyMessage() ? styles.myMessageText : styles.messageText}>
+          {plainText}
+        </Text>
+      )}
       {message.messageType === MessageTypeEnum.image && (
         <View style={[styles.images, { width: imageContainerWidth }]}>
           <ImageAttachment url={plainText} />
         </View>
       )}
-      <Text style={styles.time}>{dayjs(message.createdAt).fromNow(true)}</Text>
+      <Text style={styles.time}>{showDate(message.createdAt)}</Text>
     </View>
   )
 }
 
-export default Message
+export default memo(Message)
 
 const styles = StyleSheet.create({
   container: {
@@ -127,6 +128,12 @@ const styles = StyleSheet.create({
   notMyMessage: {
     backgroundColor: Colors.background,
     alignSelf: 'flex-start',
+  },
+  myMessageText: {
+    color: Colors.black,
+  },
+  messageText: {
+    color: Colors.textDark,
   },
   images: {
     flexDirection: 'row',

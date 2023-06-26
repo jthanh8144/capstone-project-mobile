@@ -10,15 +10,19 @@ function FriendList({
   refreshControl,
   onPressItem,
   onLoadMore,
+  haveCall,
 }: {
   friends: User[]
   refreshControl?: ReactElement
   onPressItem?: VoidFunction
   onLoadMore?: PromiseVoidFunction
+  haveCall?: boolean
 }) {
   function renderItem(itemData: ListRenderItemInfo<User>) {
     const { item } = itemData
-    return <FriendItem friend={item} onPress={onPressItem} />
+    return (
+      <FriendItem friend={item} onPress={onPressItem} haveCall={haveCall} />
+    )
   }
 
   return (

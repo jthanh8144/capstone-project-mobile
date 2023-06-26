@@ -1,29 +1,25 @@
 import { StyleSheet } from 'react-native'
+import { Colors } from '../../../constants/colors'
 
 export const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: 'whitesmoke',
+    backgroundColor: Colors.chatBoxContainer,
     padding: 5,
     paddingHorizontal: 10,
     alignItems: 'center',
   },
   input: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: Colors.background,
+    color: Colors.textDark,
     padding: 5,
     paddingHorizontal: 10,
     marginHorizontal: 10,
 
     borderRadius: 50,
-    borderColor: 'lightgray',
+    borderColor: Colors.chatBoxBorder,
     borderWidth: StyleSheet.hairlineWidth,
-  },
-  send: {
-    backgroundColor: 'royalblue',
-    padding: 7,
-    borderRadius: 15,
-    overflow: 'hidden',
   },
   cancelWrapper: {
     alignItems: 'center',
@@ -32,24 +28,19 @@ export const styles = StyleSheet.create({
   attachmentsContainer: {
     alignItems: 'flex-end',
   },
+  imageWrapper: {
+    backgroundColor: Colors.backgroundDark,
+  },
   selectedImage: {
     height: 100,
-    width: 200,
+    width: 150,
     margin: 5,
-  },
-  progressImage: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    backgroundColor: '#8c8c8cAA',
-    padding: 5,
-    borderRadius: 50,
   },
   removeSelectedImage: {
     position: 'absolute',
     right: 10,
-    backgroundColor: 'white',
-    borderRadius: 10,
+    backgroundColor: Colors.background,
+    borderRadius: 100,
     overflow: 'hidden',
   },
 })
