@@ -4,7 +4,14 @@ import React, {
   useLayoutEffect,
   useState,
 } from 'react'
-import { Platform, RefreshControl, StyleSheet, Text, View } from 'react-native'
+import {
+  AppState,
+  Platform,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import {
   useInfiniteQuery,
@@ -53,13 +60,15 @@ function ChatListScreen() {
           route.name !== 'Chat' ||
           (route.name === 'Chat' && route.params['id'] !== data.conservationId)
         ) {
-          PushNotification.localNotification({
-            channelId: 'chat-notification',
-            title: 'Safe Talk',
-            message: `${data.user.fullName} send a message to you`,
-            playSound: true,
-            soundName: 'default',
-          })
+          if (AppState.currentState === 'active') {
+            PushNotification.localNotification({
+              channelId: 'chat-notification',
+              title: 'Safe Talk',
+              message: `${data.user.fullName} send a message to you`,
+              playSound: true,
+              soundName: 'default',
+            })
+          }
         }
       }
     } catch (err) {

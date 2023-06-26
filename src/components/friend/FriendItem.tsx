@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
 import {
@@ -9,24 +9,34 @@ import {
 } from '@privacyresearch/libsignal-protocol-typescript'
 import Spinner from 'react-native-loading-spinner-overlay'
 import FastImage from 'react-native-fast-image'
+import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 
 import { images } from '../../assets/images'
 import { Colors } from '../../constants/colors'
+import { PHONE } from '../../constants/icons'
 import { User } from '../../models/user'
-import { getConservationWith } from '../../services/http'
+import {
+  createCall,
+  createCallRoom,
+  getConservationWith,
+} from '../../services/http'
 import { LocalMessageRepository } from '../../services/database'
 import { AppContext } from '../../store/app-context'
 import { base64ToArrayBuffer } from '../../utils'
 import { ChatStackPropHook, VoidFunction } from '../../types'
+import IconButton from '../ui/IconButton'
 
 function FriendItem({
   friend,
   onPress,
+  haveCall,
 }: {
   friend: User
   onPress?: VoidFunction
+  haveCall?: boolean
 }) {
-  const { signalStore, setLocalMessages } = useContext(AppContext)
+  const { signalStore, setLocalMessages, user, setCallingFullName } =
+    useContext(AppContext)
   const [isLoading, setIsLoading] = useState(false)
   const { navigate } = useNavigation<ChatStackPropHook>()
 
@@ -83,25 +93,52 @@ function FriendItem({
     }
   }
 
+  const handlePressCall = async () => {
+    try {
+      const { roomId } = await createCallRoom()
+      await createCall(friend.id, roomId, user.fullName)
+      setCallingFullName(user.fullName)
+      navigate('Calling', { id: friend.id, name: friend.fullName })
+    } catch (err) {
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Error',
+        textBody: err?.message,
+        button: 'close',
+      })
+    }
+  }
+
   return (
     <>
       <Spinner visible={isLoading} />
-      <Pressable
-        style={({ pressed }) => [styles.container, pressed && styles.pressed]}
-        onPress={handlePress}>
-        <View style={styles.imageWrapper}>
-          <FastImage
-            source={
-              friend?.avatarUrl
-                ? { uri: friend.avatarUrl }
-                : images.avatarPlaceholder
-            }
-            style={styles.image}
+      <View style={[styles.container, styles.mb10]}>
+        <Pressable
+          style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+          onPress={handlePress}>
+          <View style={styles.imageWrapper}>
+            <FastImage
+              source={
+                friend?.avatarUrl
+                  ? { uri: friend.avatarUrl }
+                  : images.avatarPlaceholder
+              }
+              style={styles.image}
+            />
+            {friend.isOnline && <View style={styles.online} />}
+          </View>
+          <Text style={styles.name}>{friend?.fullName}</Text>
+        </Pressable>
+        {haveCall && Platform.OS === 'android' && (
+          <IconButton
+            svgText={PHONE}
+            size={24}
+            onPress={handlePressCall}
+            backgroundColor={Colors.primary}
+            color={Colors.white}
           />
-          {friend.isOnline && <View style={styles.online} />}
-        </View>
-        <Text style={styles.name}>{friend?.fullName}</Text>
-      </Pressable>
+        )}
+      </View>
     </>
   )
 }
@@ -115,6 +152,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+  },
+  mb10: {
     marginBottom: 10,
   },
   imageWrapper: {

@@ -11,6 +11,8 @@ type AppContextType = {
   signalStore: SignalProtocolStore
   localMessages: LocalMessage[]
   setLocalMessages: Dispatch<SetStateAction<LocalMessage[]>>
+  callingFullName: string | null
+  setCallingFullName: Dispatch<SetStateAction<string | null>>
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -19,12 +21,15 @@ export const AppContext = createContext<AppContextType>({
   signalStore: new SignalProtocolStore(),
   localMessages: [],
   setLocalMessages: () => {},
+  callingFullName: null,
+  setCallingFullName: () => {},
 })
 
 function AppProvider({ children }: ChildProps) {
   const [user, setUser] = useState<User | null>(null)
   const [signalStore] = useState(new SignalProtocolStore())
   const [localMessages, setLocalMessages] = useState<LocalMessage[]>()
+  const [callingFullName, setCallingFullName] = useState<string | null>(null)
 
   return (
     <AppContext.Provider
@@ -34,6 +39,8 @@ function AppProvider({ children }: ChildProps) {
         signalStore,
         localMessages,
         setLocalMessages,
+        callingFullName,
+        setCallingFullName,
       }}>
       {children}
     </AppContext.Provider>

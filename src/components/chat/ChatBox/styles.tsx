@@ -12,6 +12,7 @@ export const styles = StyleSheet.create({
   input: {
     flex: 1,
     backgroundColor: Colors.background,
+    color: Colors.textDark,
     padding: 5,
     paddingHorizontal: 10,
     marginHorizontal: 10,

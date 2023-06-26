@@ -24,6 +24,7 @@ import {
   getConservationSetting,
   getPresignedUrl,
   newConservation,
+  sendMessage,
 } from '../../../services/http'
 import { LocalMessageRepository } from '../../../services/database'
 import { uploadFileToPresignedUrl } from '../../../services/http'
@@ -124,6 +125,45 @@ function NewChatBox({ user }: { user: User }) {
       },
     },
   )
+  const imageMutation = useMutation(
+    async ({
+      message,
+      messageType,
+      encryptType,
+      conservationId,
+      url,
+    }: {
+      message: string
+      messageType: MessageTypeEnum
+      encryptType: number
+      conservationId: string
+      url?: string
+    }) => {
+      const { messageId } = await sendMessage(
+        conservationId,
+        message,
+        messageType,
+        encryptType,
+      )
+      return { messageId, url, conservationId }
+    },
+    {
+      onSuccess: async ({ messageId, url, conservationId }) => {
+        const localMessageRepository = new LocalMessageRepository()
+        await localMessageRepository.saveMessage(conservationId, messageId, url)
+        await Promise.all([
+          (async () => {
+            const res = await localMessageRepository.getMessagesOfConservation(
+              conservationId,
+            )
+            setLocalMessages(res)
+          })(),
+          queryClient.invalidateQueries([`conservation_${conservationId}`]),
+          queryClient.invalidateQueries(['conservations']),
+        ])
+      },
+    },
+  )
 
   const handleResponse = (response: Image[]) => {
     setIsShowModel(false)
@@ -143,19 +183,20 @@ function NewChatBox({ user }: { user: User }) {
   const handleSendMessage = async () => {
     setIsLoading(true)
     const sessionCipher = await getSessionCipher()
+    let conservationId: string
     if (text.trim()) {
       const buffer = new TextEncoder().encode(text.trim()).buffer
       const cipherText = await sessionCipher.encrypt(buffer)
-      await mutateAsync({
+      const res = await mutateAsync({
         message: Base64.btoa(cipherText.body),
         messageType: type,
         encryptType: cipherText.type,
       })
+      conservationId = res.conservationId
     }
     if (files.length) {
       const urls = await Promise.all(
         files.map(async file => {
-          console.log(file.mime)
           const { url, presignedUrl } = await getPresignedUrl(
             file.mime?.split('/')[1] || 'png',
             'message_file',
@@ -170,11 +211,12 @@ function NewChatBox({ user }: { user: User }) {
       for (const url of urls) {
         const buffer = new TextEncoder().encode(url).buffer
         const cipherText = await sessionCipher.encrypt(buffer)
-        await mutateAsync({
+        await imageMutation.mutateAsync({
           message: Base64.btoa(cipherText.body),
           messageType: MessageTypeEnum.image,
           encryptType: cipherText.type,
           url,
+          conservationId,
         })
       }
       setFiles([])

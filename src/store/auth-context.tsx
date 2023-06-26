@@ -13,7 +13,7 @@ type AuthContextType = {
     refreshToken: string,
     userId: string,
   ) => Promise<void>
-  logout: (isRemoved?: boolean) => Promise<void>
+  logout: (isShowNotification?: boolean) => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -35,11 +35,11 @@ function AuthProvider({ children }: ChildProps) {
     setIsAuthenticated(true)
   }
 
-  async function logout(isRemoved?: boolean) {
+  async function logout(isShowNotification?: boolean) {
     const refreshToken = await AsyncStorage.getItem('refreshToken')
     if (refreshToken) {
       const res = await logoutUser(refreshToken)
-      if (!isRemoved) {
+      if (!isShowNotification) {
         Dialog.show({
           type: ALERT_TYPE.SUCCESS,
           title: 'Success',

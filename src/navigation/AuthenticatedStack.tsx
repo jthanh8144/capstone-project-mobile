@@ -12,6 +12,8 @@ import SearchUserScreen from '../screens/search/SearchUserScreen'
 import ChatRoomSettingScreen from '../screens/chat/ChatRoomSettingScreen'
 import SearchConservationScreen from '../screens/search/SearchConservationScreen'
 import WebViewScreen from '../screens/common/WebViewScreen'
+import CallingScreen from '../screens/call/CallingScreen'
+import CallRoomScreen from '../screens/call/CallRoomScreen'
 
 const Stack = createNativeStackNavigator<AuthenticatedStackParamList>()
 
@@ -78,6 +80,8 @@ function AuthenticatedStack() {
         component={WebViewScreen}
         options={{ headerShown: true, title: 'Web View' }}
       />
+      <Stack.Screen name="Calling" component={CallingScreen} />
+      <Stack.Screen name="CallRoom" component={CallRoomScreen} />
     </Stack.Navigator>
   )
 }
