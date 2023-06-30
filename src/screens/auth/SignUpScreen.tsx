@@ -52,14 +52,14 @@ function SignUpScreen({ navigation }: SignUpStackProp) {
     <>
       <Spinner visible={isLoading} />
       <AuthContent
-        title={'Sign Up'}
+        title={'Register'}
         isLogin={false}
         onSubmit={async data => {
           mutateAsync(data)
         }}
         onError={onError}
         question="Already have an account."
-        otherActionLabel={'Login'}
+        otherActionLabel={'Sign in'}
         onPressOtherAction={() => {
           navigation.replace('Login')
         }}
