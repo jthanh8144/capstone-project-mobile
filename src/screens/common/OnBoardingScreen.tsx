@@ -23,7 +23,7 @@ function OnBoardingScreen({ navigation }: OnBoardingStackProp) {
         <Text style={styles.appName}>Safe Talk</Text>
         <Text style={styles.description}>Simple Secure Reliable Messaging</Text>
         <View style={styles.button}>
-          <Button onPress={goToLogin}>Login</Button>
+          <Button onPress={goToLogin}>Sign In</Button>
         </View>
         <OtherAction
           question="Don't have an account?"

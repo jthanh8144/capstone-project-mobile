@@ -156,7 +156,7 @@ function AuthForm({
           </View>
         )}
         <Button onPress={handleSubmit(onSubmit, onError)}>
-          {isLogin ? 'Login' : 'Sign Up'}
+          {isLogin ? 'Sign In' : 'Sign Up'}
         </Button>
       </ScrollView>
       <Dialog.Container visible={isShownForget}>
