@@ -114,19 +114,18 @@ function MainNavigation() {
 
   return (
     <PortalProvider>
-      <GestureHandlerRootView
-        style={StyleSheet.create({ container: { flex: 1 } }).container}>
-        <BottomSheetModalProvider>
-          <NavigationContainer ref={navigationRef}>
+      <NavigationContainer ref={navigationRef}>
+        <GestureHandlerRootView
+          style={StyleSheet.create({ container: { flex: 1 } }).container}>
+          <BottomSheetModalProvider>
             {isAuthenticated ? (
               <AuthenticatedStack />
             ) : (
               <NonAuthenticatedStack />
             )}
-          </NavigationContainer>
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>
-      {/* </NavigationContainer> */}
+          </BottomSheetModalProvider>
+        </GestureHandlerRootView>
+      </NavigationContainer>
     </PortalProvider>
   )
 }
