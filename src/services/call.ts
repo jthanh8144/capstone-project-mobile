@@ -1,6 +1,6 @@
 import uuid from 'react-native-uuid'
-import { BackHandler, Platform } from 'react-native'
-import RNCallKeep from 'react-native-callkeep'
+import { AppState, BackHandler, Platform } from 'react-native'
+import RNCallKeep, { IOptions } from 'react-native-callkeep'
 import { StackActions } from '@react-navigation/native'
 import messaging, {
   FirebaseMessagingTypes,
@@ -9,8 +9,8 @@ import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import AndroidOverlayPermission from 'videosdk-rn-android-overlay-permission'
 
 import { CallKeepFunc, CallType, RemoteMessageData } from '../types'
-import { updateCall } from './http'
 import { navigationRef } from '../navigation/MainNavigation'
+import { updateCall } from './http'
 
 class CallService {
   private callId: string
@@ -18,28 +18,35 @@ class CallService {
     this.callId = null
   }
 
+  private options: IOptions = {
+    ios: {
+      appName: 'Safe Talk',
+      supportsVideo: false,
+      maximumCallGroups: '1',
+      maximumCallsPerCallGroup: '1',
+    },
+    android: {
+      alertTitle: 'Permissions required',
+      alertDescription: 'This application needs to access your phone accounts',
+      cancelButton: 'Cancel',
+      okButton: 'Ok',
+      imageName: 'phone_account_icon',
+      additionalPermissions: [],
+    },
+  }
+
   setupCallKeep = async () => {
     try {
-      await RNCallKeep.setup({
-        ios: {
-          appName: 'Safe Talk',
-          supportsVideo: false,
-          maximumCallGroups: '1',
-          maximumCallsPerCallGroup: '1',
-        },
-        android: {
-          alertTitle: 'Permissions required',
-          alertDescription:
-            'This application needs to access your phone accounts',
-          cancelButton: 'Cancel',
-          okButton: 'Ok',
-          imageName: 'phone_account_icon',
-          additionalPermissions: [],
-        },
-      })
+      await RNCallKeep.setup(this.options)
     } catch (error) {
       console.error('setup call keep error:', error?.message)
     }
+  }
+
+  setupCallKeepInBackground = () => {
+    RNCallKeep.registerPhoneAccount(this.options)
+    RNCallKeep.registerAndroidEvents()
+    RNCallKeep.setAvailable(true)
   }
 
   configure = async (
@@ -47,7 +54,11 @@ class CallService {
     endIncomingCall: CallKeepFunc,
   ) => {
     try {
-      await this.setupCallKeep()
+      if (AppState.currentState === 'active') {
+        await this.setupCallKeep()
+      } else {
+        this.setupCallKeepInBackground()
+      }
       Platform.OS === 'android' && RNCallKeep.setAvailable(true)
       RNCallKeep.addEventListener('answerCall', incomingCallAnswer)
       RNCallKeep.addEventListener('endCall', endIncomingCall)
@@ -169,45 +180,50 @@ export const initializeCallHandle = () => {
 export const backgroundHandler = (
   remoteMessage: FirebaseMessagingTypes.RemoteMessage,
 ) => {
-  const navigate: (screenName: string, options: any) => void =
-    navigationRef.navigate
-  const { callerId, callerName, meetingId, type }: RemoteMessageData =
-    remoteMessage.data
-  if (type && type === CallType.CALL_INITIATED) {
-    const incomingCallAnswer: CallKeepFunc = ({ callUUID }) => {
-      ;(async () => {
-        try {
-          // RNCallKeep.backToForeground()
-          await updateCall(callerId, CallType.ACCEPTED, meetingId)
-          callService.endIncomingCallAnswer(callUUID)
-          navigate('CallRoom', { meetingId })
-        } catch (err) {
-          Dialog.show({
-            type: ALERT_TYPE.DANGER,
-            title: 'Error',
-            textBody: err?.message,
-            button: 'close',
-          })
-        }
-      })()
+  try {
+    const navigate: (screenName: string, options: any) => void =
+      navigationRef.navigate
+    const { callerId, callerName, meetingId, type }: RemoteMessageData =
+      remoteMessage.data
+    if (type && type === CallType.CALL_INITIATED) {
+      const incomingCallAnswer: CallKeepFunc = ({ callUUID }) => {
+        ;(async () => {
+          try {
+            // RNCallKeep.backToForeground()
+            await updateCall(callerId, CallType.ACCEPTED, meetingId)
+            callService.endIncomingCallAnswer(callUUID)
+            navigate('CallRoom', { meetingId })
+          } catch (err) {
+            Dialog.show({
+              type: ALERT_TYPE.DANGER,
+              title: 'Error',
+              textBody: err?.message,
+              button: 'close',
+            })
+          }
+        })()
+      }
+      const endIncomingCall: CallKeepFunc = ({ callUUID }) => {
+        ;(async () => {
+          try {
+            callService.endIncomingCallAnswer(callUUID)
+            await updateCall(callerId, CallType.REJECTED)
+          } catch (err) {
+            Dialog.show({
+              type: ALERT_TYPE.DANGER,
+              title: 'Error',
+              textBody: err?.message,
+              button: 'close',
+            })
+          }
+        })()
+      }
+      callService.configure(incomingCallAnswer, endIncomingCall)
+      callService.displayIncomingCall(callerName)
+      RNCallKeep.backToForeground()
+      return Promise.resolve('' as any)
     }
-    const endIncomingCall: CallKeepFunc = ({ callUUID }) => {
-      ;(async () => {
-        try {
-          callService.endIncomingCallAnswer(callUUID)
-          await updateCall(callerId, CallType.REJECTED)
-        } catch (err) {
-          Dialog.show({
-            type: ALERT_TYPE.DANGER,
-            title: 'Error',
-            textBody: err?.message,
-            button: 'close',
-          })
-        }
-      })()
-    }
-    callService.configure(incomingCallAnswer, endIncomingCall)
-    callService.displayIncomingCall(callerName)
-    RNCallKeep.backToForeground()
+  } catch (err) {
+    console.log(err)
   }
 }
