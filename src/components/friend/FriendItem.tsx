@@ -25,6 +25,7 @@ import { AppContext } from '../../store/app-context'
 import { base64ToArrayBuffer } from '../../utils'
 import { ChatStackPropHook, VoidFunction } from '../../types'
 import IconButton from '../ui/IconButton'
+import { callService } from '../../services/call'
 
 function FriendItem({
   friend,
@@ -95,6 +96,7 @@ function FriendItem({
 
   const handlePressCall = async () => {
     try {
+      await callService.setupCallKeep()
       const { roomId } = await createCallRoom()
       await createCall(friend.id, roomId, user.fullName)
       setCallingFullName(user.fullName)
