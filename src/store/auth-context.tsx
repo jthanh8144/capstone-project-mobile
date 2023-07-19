@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction, createContext, useState } from 'react'
+import { Platform } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
 import messaging from '@react-native-firebase/messaging'
@@ -37,11 +38,13 @@ function AuthProvider({ children }: ChildProps) {
     if (fcmToken) {
       await updateUserFcm(fcmToken)
     } else {
-      const fcm = await messaging().getToken()
-      await Promise.all([
-        updateUserFcm(fcm),
-        AsyncStorage.setItem('fcmToken', fcm),
-      ])
+      if (Platform.OS !== 'ios') {
+        const fcm = await messaging().getToken()
+        await Promise.all([
+          updateUserFcm(fcm),
+          AsyncStorage.setItem('fcmToken', fcm),
+        ])
+      }
     }
     setIsAuthenticated(true)
   }
