@@ -1,7 +1,7 @@
 import '../ignoreWarnings'
 
 import React from 'react'
-import { StatusBar } from 'react-native'
+import { Platform, StatusBar } from 'react-native'
 import { AlertNotificationRoot } from 'react-native-alert-notification'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ErrorBoundary from 'react-native-error-boundary'
@@ -13,7 +13,8 @@ import { backgroundHandler } from './services/call'
 import MainNavigation from './navigation/MainNavigation'
 import { isDarkMode } from './utils'
 
-messaging().setBackgroundMessageHandler(backgroundHandler)
+Platform.OS !== 'ios' &&
+  messaging().setBackgroundMessageHandler(backgroundHandler)
 
 const queryClient = new QueryClient({
   defaultOptions: {
