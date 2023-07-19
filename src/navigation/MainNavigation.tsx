@@ -37,7 +37,7 @@ function MainNavigation() {
 
   useEffect(() => {
     ;(async () => {
-      await initializeCallKeep()
+      Platform.OS !== 'ios' && (await initializeCallKeep())
       const [accessToken, refreshToken, storedDeviceId, userId, fcmToken] =
         await Promise.all([
           AsyncStorage.getItem('accessToken'),
@@ -59,7 +59,7 @@ function MainNavigation() {
               AsyncStorage.setItem('fcmToken', fcm),
             ])
           }
-          initializeCallHandle()
+          Platform.OS !== 'ios' && initializeCallHandle()
         }
       }
       await Promise.all([
