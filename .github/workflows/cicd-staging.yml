@@ -3,7 +3,7 @@ name: CI/CD
 on:
   push:
     branches:
-      - staging
+      - staging_
 
 jobs:
   cicd:
@@ -19,10 +19,10 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
           cache: 'gradle'
-      
+
       - name: Setup and cache Node
         uses: ./.github/actions/setup-node
-      
+
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
@@ -45,7 +45,7 @@ jobs:
 
       - name: Make Gradlew Executable
         run: cd android && chmod +x ./gradlew
-      
+
       - name: Generate App APK
         run: |
           cd android && ./gradlew assembleRelease --no-daemon
