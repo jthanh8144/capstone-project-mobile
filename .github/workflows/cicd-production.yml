@@ -1,9 +1,10 @@
-name: CI/CD
+name: Build production
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   cicd:
