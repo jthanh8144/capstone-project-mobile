@@ -6,7 +6,6 @@ import messaging, {
   FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging'
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification'
-import AndroidOverlayPermission from 'videosdk-rn-android-overlay-permission'
 
 import { CallKeepFunc, CallType, RemoteMessageData } from '../types'
 import { navigationRef } from '../navigation/MainNavigation'
@@ -100,10 +99,6 @@ export const callService = new CallService()
 export const initializeCallKeep = async () => {
   await callService.setupCallKeep()
   RNCallKeep.setAvailable(true)
-
-  if (Platform.OS === 'android') {
-    AndroidOverlayPermission.requestOverlayPermission()
-  }
 }
 
 export const initializeCallHandle = () => {
