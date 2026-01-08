@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {
-  useMeeting,
-  ReactNativeForegroundService,
-} from '@videosdk.live/react-native-sdk'
+import { useMeeting } from '@videosdk.live/react-native-sdk'
 
 import ParticipantLimitView from './OneToOne/ParticipantLimitView'
 import WaitingToJoinView from './WaitingToJoinView'
@@ -46,10 +43,7 @@ export default function MeetingView({
       }
     }, 1000)
 
-    return () => {
-      leave()
-      ReactNativeForegroundService.stopAll()
-    }
+    return () => leave()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
